@@ -12,6 +12,8 @@ public class Building {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String buildingName;
+    @OneToMany
+    @JoinColumn(name = "tb_floors.id")
     private List<Floors> floorsList;
     private String city;
 

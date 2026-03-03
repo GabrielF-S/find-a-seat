@@ -9,6 +9,9 @@ public class Employees {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String employeeName;
+
+    @OneToOne
+    @JoinColumn(name="tb_users.id")
     private User user;
 
     public Employees() {

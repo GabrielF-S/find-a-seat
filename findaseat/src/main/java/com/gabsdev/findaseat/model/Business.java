@@ -13,7 +13,11 @@ public class Business {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID uuid;
     private String businessName;
+    @OneToMany
+    @JoinColumn(name = "tb_employees.id")
     private List<Employees> employees;
+    @OneToMany
+    @JoinColumn(name = "tb_buildings.id")
     private List<Building> buildings;
 
     public Business() {
