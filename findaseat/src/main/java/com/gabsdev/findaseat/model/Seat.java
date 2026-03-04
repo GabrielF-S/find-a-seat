@@ -1,6 +1,7 @@
 package com.gabsdev.findaseat.model;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,9 @@ public class Seat {
     private String slug;
     private Status status;
     private boolean exclusive;
+    @JsonFormat(pattern = "dd/MM/yy HH:mm")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd/MM/yy HH:mm")
     private LocalDateTime updatedAt;
 
     public Seat() {
