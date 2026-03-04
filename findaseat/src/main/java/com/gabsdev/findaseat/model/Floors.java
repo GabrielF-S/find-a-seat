@@ -13,6 +13,8 @@ public class Floors {
     private Long id;
     private String floorName;
     private String slug;
+    @OneToMany
+    @JoinColumn(name = "tb_seats.id")
     private List<Seat> seatList;
 
     public Floors() {
