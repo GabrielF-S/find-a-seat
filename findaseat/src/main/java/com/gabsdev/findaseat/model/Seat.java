@@ -16,9 +16,9 @@ public class Seat {
     private String slug;
     private Status status;
     private boolean exclusive;
-    @JsonFormat(pattern = "dd/MM/yy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd/MM/yy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime updatedAt;
 
     public Seat() {
