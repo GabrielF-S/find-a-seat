@@ -2,8 +2,9 @@ package com.gabsdev.findaseat.controller.impl;
 
 
 import com.gabsdev.findaseat.controller.BusinessController;
-import com.gabsdev.findaseat.dto.request.RequestBusiness;
-import com.gabsdev.findaseat.dto.response.ResponseBusiness;
+import com.gabsdev.findaseat.dto.request.BusinessRequest;
+import com.gabsdev.findaseat.dto.response.BusinessResponse;
+import com.gabsdev.findaseat.model.Business;
 import com.gabsdev.findaseat.service.BusinessService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,28 +25,30 @@ public class BusinessControllerImpl implements BusinessController {
     }
 
     @Override
-    public ResponseEntity<ResponseBusiness> createBusiness(RequestBusiness business) {
+    public ResponseEntity<BusinessResponse> createBusiness(BusinessRequest business) {
         return  new ResponseEntity<>(service.createBusiness(business), HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<ResponseBusiness> getBusinessById(UUID uuid) {
+    public ResponseEntity<BusinessResponse> getBusinessById(UUID uuid) {
 
         return ResponseEntity.ok(service.getBusinessById(uuid));
     }
 
     @Override
-    public ResponseEntity<List<ResponseBusiness>> getAllBusiness() {
+    public ResponseEntity<List<BusinessResponse>> getAllBusiness() {
         return ResponseEntity.ok(service.getAllBusiness());
     }
 
     @Override
-    public ResponseEntity<ResponseBusiness> updateBusiness(RequestBusiness business) {
-        return null;
+    public ResponseEntity<Business> updateBusiness(Business business) {
+
+        return ResponseEntity.ok(service.updateBusiness(business));
     }
 
     @Override
     public ResponseEntity<Void> deleteBusiness(UUID uuid) {
-        return null;
+        service.deleteBusiness(uuid);
+        return ResponseEntity.noContent().build();
     }
 }

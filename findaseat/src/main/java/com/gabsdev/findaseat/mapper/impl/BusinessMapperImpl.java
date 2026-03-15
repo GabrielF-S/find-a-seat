@@ -1,7 +1,7 @@
 package com.gabsdev.findaseat.mapper.impl;
 
-import com.gabsdev.findaseat.dto.request.RequestBusiness;
-import com.gabsdev.findaseat.dto.response.ResponseBusiness;
+import com.gabsdev.findaseat.dto.request.BusinessRequest;
+import com.gabsdev.findaseat.dto.response.BusinessResponse;
 import com.gabsdev.findaseat.mapper.BusinessMapper;
 import com.gabsdev.findaseat.model.Business;
 import org.springframework.stereotype.Component;
@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class BusinessMapperImpl implements BusinessMapper {
     @Override
-    public Business toBusiness(RequestBusiness business) {
+    public Business toBusiness(BusinessRequest business) {
         Business newBusiness = new Business(business.businessName(), business.location());
         return newBusiness;
     }
 
     @Override
-    public ResponseBusiness toBusinessResponse(Business businessSaved) {
+    public BusinessResponse toBusinessResponse(Business businessSaved) {
 
-        ResponseBusiness business = new ResponseBusiness(businessSaved.getUuid(),
+        BusinessResponse business = new BusinessResponse(businessSaved.getUuid(),
                 businessSaved.getBusinessName(),
                 businessSaved.getLocation());
 
