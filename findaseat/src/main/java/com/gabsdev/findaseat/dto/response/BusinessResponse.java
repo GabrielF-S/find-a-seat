@@ -4,5 +4,5 @@ import com.gabsdev.findaseat.model.Location;
 
 import java.util.UUID;
 
-public record ResponseBusiness(UUID id, String businessName, Location location) {
+public record BusinessResponse(UUID id, String businessName, Location location) {
 }

@@ -1,7 +1,7 @@
 package com.gabsdev.findaseat.service.impl;
 
-import com.gabsdev.findaseat.dto.request.RequestBusiness;
-import com.gabsdev.findaseat.dto.response.ResponseBusiness;
+import com.gabsdev.findaseat.dto.request.BusinessRequest;
+import com.gabsdev.findaseat.dto.response.BusinessResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.mapper.BusinessMapper;
 import com.gabsdev.findaseat.model.Business;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class BusinessServiceImpl implements BusinessService {
@@ -25,20 +24,37 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public ResponseBusiness createBusiness(RequestBusiness business) {
+    public BusinessResponse createBusiness(BusinessRequest business) {
         Business businessToSave = mapper.toBusiness(business);
         Business businessSaved = repository.save(businessToSave);
         return mapper.toBusinessResponse(businessSaved) ;
     }
 
     @Override
-    public ResponseBusiness getBusinessById(UUID uuid) {
+    public BusinessResponse getBusinessById(UUID uuid) {
         Business business = repository.findById(uuid).orElseThrow(() -> new BusinessNotFoundException("Business Not Found"));
         return mapper.toBusinessResponse(business);
     }
 
     @Override
-    public List<ResponseBusiness> getAllBusiness() {
+    public List<BusinessResponse> getAllBusiness() {
         return  repository.findAll().stream().map(mapper::toBusinessResponse).toList();
+    }
+
+    @Override
+    public Business updateBusiness(Business business) {
+        if (!repository.existsById(business.getUuid())){
+            throw new BusinessNotFoundException("Business Not Found");
+        }
+        return repository.save(business);
+    }
+
+    @Override
+    public void deleteBusiness(UUID uuid) {
+        if (!repository.existsById(uuid)){
+            throw new BusinessNotFoundException("Business Not Found");
+        }
+        repository.deleteById(uuid);
+
     }
 }

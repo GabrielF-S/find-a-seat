@@ -1,7 +1,8 @@
 package com.gabsdev.findaseat.controller;
 
-import com.gabsdev.findaseat.dto.request.RequestBusiness;
-import com.gabsdev.findaseat.dto.response.ResponseBusiness;
+import com.gabsdev.findaseat.dto.request.BusinessRequest;
+import com.gabsdev.findaseat.dto.response.BusinessResponse;
+import com.gabsdev.findaseat.model.Business;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.http.ResponseEntity;
@@ -14,19 +15,19 @@ public interface BusinessController {
 
 
     @PostMapping(value = "/create")
-    ResponseEntity<ResponseBusiness> createBusiness(@RequestBody RequestBusiness business);
+    ResponseEntity<BusinessResponse> createBusiness(@RequestBody BusinessRequest business);
 
     @GetMapping(value = "/get/{uuid}")
-    ResponseEntity<ResponseBusiness> getBusinessById(@PathVariable UUID uuid);
+    ResponseEntity<BusinessResponse> getBusinessById(@PathVariable UUID uuid);
 
     @GetMapping(value = "/getAll")
-    ResponseEntity<List<ResponseBusiness>> getAllBusiness();
+    ResponseEntity<List<BusinessResponse>> getAllBusiness();
 
     @PutMapping(value = "/update")
-    ResponseEntity<ResponseBusiness> updateBusiness(@RequestBody RequestBusiness business);
+    ResponseEntity<Business> updateBusiness(@RequestBody Business business);
 
 
-    @DeleteMapping(value = "/delete")
+    @DeleteMapping(value = "/delete/{uuid}")
     ResponseEntity<Void> deleteBusiness(@PathVariable UUID uuid);
 
 

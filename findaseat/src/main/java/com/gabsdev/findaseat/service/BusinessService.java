@@ -1,7 +1,8 @@
 package com.gabsdev.findaseat.service;
 
-import com.gabsdev.findaseat.dto.request.RequestBusiness;
-import com.gabsdev.findaseat.dto.response.ResponseBusiness;
+import com.gabsdev.findaseat.dto.request.BusinessRequest;
+import com.gabsdev.findaseat.dto.response.BusinessResponse;
+import com.gabsdev.findaseat.model.Business;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +11,14 @@ import java.util.UUID;
 public interface BusinessService {
 
 
-    ResponseBusiness createBusiness(RequestBusiness business);
+    BusinessResponse createBusiness(BusinessRequest business);
 
 
-    ResponseBusiness getBusinessById(UUID uuid);
+    BusinessResponse getBusinessById(UUID uuid);
 
-    List<ResponseBusiness> getAllBusiness();
+    List<BusinessResponse> getAllBusiness();
+
+    Business updateBusiness(Business business);
+
+    void deleteBusiness(UUID uuid);
 }
