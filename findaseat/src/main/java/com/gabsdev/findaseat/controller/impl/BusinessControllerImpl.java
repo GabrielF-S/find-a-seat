@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +28,10 @@ public class BusinessControllerImpl implements BusinessController {
 
     @Override
     public ResponseEntity<BusinessResponse> createBusiness(BusinessRequest business) {
-        return  new ResponseEntity<>(service.createBusiness(business), HttpStatus.CREATED);
+        BusinessResponse businessResponse = service.createBusiness(business);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("{id}").buildAndExpand(businessResponse.id()).toUri();
+        return  ResponseEntity.created(uri).build();
+
     }
 
     @Override
