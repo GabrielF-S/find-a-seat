@@ -20,8 +20,32 @@ public class Seat {
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "tb_floors_id")
+    private Floors floors;
+
+    public Seat(Long id, String seatName, String slug,
+                Status status, boolean exclusive, LocalDateTime createdAt,
+                LocalDateTime updatedAt, Floors floors) {
+        this.id = id;
+        this.seatName = seatName;
+        this.slug = slug;
+        this.status = status;
+        this.exclusive = exclusive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.floors = floors;
+    }
 
     public Seat() {
+    }
+
+    public Floors getFloors() {
+        return floors;
+    }
+
+    public void setFloors(Floors floors) {
+        this.floors = floors;
     }
 
     public Seat(String seatName, String slug, Status status, boolean exclusive, LocalDateTime createdAt, LocalDateTime updatedAt) {

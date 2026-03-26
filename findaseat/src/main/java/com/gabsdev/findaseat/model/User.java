@@ -14,6 +14,9 @@ public class User {
     private String email;
     private String password;
     private List<String> roles;
+    @OneToOne
+    @JoinColumn(name = "tb_employees_id")
+    private Employees employees;
 
     public User() {
     }
@@ -54,5 +57,13 @@ public class User {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public Employees getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(Employees employees) {
+        this.employees = employees;
     }
 }

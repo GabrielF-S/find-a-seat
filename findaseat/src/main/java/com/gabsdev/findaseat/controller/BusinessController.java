@@ -14,10 +14,10 @@ import java.util.UUID;
 public interface BusinessController {
 
 
-    @PostMapping(value = "/create")
+    @PostMapping()
     ResponseEntity<BusinessResponse> createBusiness(@RequestBody BusinessRequest business);
 
-    @GetMapping(value = "/get/{uuid}")
+    @GetMapping(value = "/{uuid}")
     ResponseEntity<BusinessResponse> getBusinessById(@PathVariable UUID uuid);
 
     @GetMapping(value = "/getAll")
