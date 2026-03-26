@@ -19,14 +19,14 @@ public class Reservation {
     private Seat seat;
     @ManyToOne
     @JoinColumn(name = "tb_employees_id")
-    private Employees employees;
+    private Employee employees;
 
 
     public Reservation() {
 
     }
 
-    public Reservation(UUID id, LocalDateTime dateTime, Seat seat, Employees employees) {
+    public Reservation(UUID id, LocalDateTime dateTime, Seat seat, Employee employees) {
         this.id = id;
         this.dateTime = dateTime;
         this.seat = seat;
@@ -57,11 +57,11 @@ public class Reservation {
         this.seat = seat;
     }
 
-    public Employees getEmployees() {
+    public Employee getEmployees() {
         return employees;
     }
 
-    public void setEmployees(Employees employees) {
+    public void setEmployees(Employee employees) {
         this.employees = employees;
     }
 }

@@ -29,14 +29,13 @@ public class BusinessControllerImpl implements BusinessController {
     @Override
     public ResponseEntity<BusinessResponse> createBusiness(BusinessRequest business) {
         BusinessResponse businessResponse = service.createBusiness(business);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("{id}").buildAndExpand(businessResponse.id()).toUri();
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(businessResponse.id()).toUri();
         return  ResponseEntity.created(uri).build();
 
     }
 
     @Override
     public ResponseEntity<BusinessResponse> getBusinessById(UUID uuid) {
-
         return ResponseEntity.ok(service.getBusinessById(uuid));
     }
 

@@ -13,12 +13,6 @@ public class Business {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID uuid;
     private String businessName;
-    @OneToMany
-    @JoinColumn(name = "tb_employees.id")
-    private List<Employees> employees;
-    @OneToMany
-    @JoinColumn(name = "tb_floors.id")
-    private List<Floors> floorsList;
     @Embedded
     private Location location;
 
@@ -26,12 +20,6 @@ public class Business {
 
     }
 
-    public Business(String businessName, List<Employees> employees, List<Floors> floorsList, Location location) {
-        this.businessName = businessName;
-        this.employees = employees;
-        this.floorsList = floorsList;
-        this.location = location;
-    }
 
     public Business(String businessName, Location location) {
         this.businessName = businessName;
@@ -54,21 +42,6 @@ public class Business {
         this.businessName = businessName;
     }
 
-    public List<Employees> getEmployees() {
-        return employees;
-    }
-
-    public void setEmployees(List<Employees> employees) {
-        this.employees = employees;
-    }
-
-    public List<Floors> getFloorsList() {
-        return floorsList;
-    }
-
-    public void setFloorsList(List<Floors> floorsList) {
-        this.floorsList = floorsList;
-    }
 
     public Location getLocation() {
         return location;
