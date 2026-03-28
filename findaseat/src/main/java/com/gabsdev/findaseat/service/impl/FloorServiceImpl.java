@@ -3,6 +3,7 @@ package com.gabsdev.findaseat.service.impl;
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
+import com.gabsdev.findaseat.exception.FloorAlredyExistException;
 import com.gabsdev.findaseat.exception.FloorNoFoundException;
 import com.gabsdev.findaseat.mapper.FloorMapper;
 import com.gabsdev.findaseat.model.Business;
@@ -34,6 +35,9 @@ public class FloorServiceImpl implements FloorService {
     @Override
     public Floor creteFloor(FloorRequest request) {
         verifyBusiness(request.businessId());
+        if (floorsRepository.existsByfloorName(request.floorName())) {
+            throw new FloorAlredyExistException("Floor "+ request.floorName() +" Already exists");
+        }
         Business business = businessRepository.findById(request.businessId()).get();
         Floor floors = mapper.toFloor(request);
 
@@ -58,8 +62,7 @@ public class FloorServiceImpl implements FloorService {
     public List<FloorResponse> getAll(UUID businessUuid) {
         verifyBusiness(businessUuid);
         List<Floor> byBusinessUuid = floorsRepository.findByBusinessUuid(businessUuid);
-        List<FloorResponse> list = byBusinessUuid.stream().map(mapper::toFloorResponse).toList();
-        return list;
+        return byBusinessUuid.stream().map(mapper::toFloorResponse).toList();
     }
 
     @Override
