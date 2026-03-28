@@ -2,6 +2,7 @@ package com.gabsdev.findaseat.controller.impl;
 
 import com.gabsdev.findaseat.controller.FloorsController;
 import com.gabsdev.findaseat.dto.request.FloorRequest;
+import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.model.Floor;
 import com.gabsdev.findaseat.service.FloorService;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,6 +35,11 @@ public class FloorsControllerImpl implements FloorsController {
     @Override
     public ResponseEntity<Floor> getFlorById(UUID uuid) {
         return ResponseEntity.ok(service.getById(uuid));
+    }
+
+    @Override
+    public ResponseEntity<List<FloorResponse>> getAllFloors(UUID businessUuid) {
+        return ResponseEntity.ok(service.getAll(businessUuid));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.gabsdev.findaseat.service.impl;
 
 import com.gabsdev.findaseat.dto.request.FloorRequest;
+import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.exception.FloorNoFoundException;
 import com.gabsdev.findaseat.mapper.FloorMapper;
@@ -12,6 +13,7 @@ import com.gabsdev.findaseat.service.FloorService;
 import com.github.slugify.Slugify;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,9 +33,7 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     public Floor creteFloor(FloorRequest request) {
-        if (!businessRepository.existsById(request.businessId())) {
-            throw new BusinessNotFoundException("Business not found!");
-        }
+        verifyBusiness(request.businessId());
         Business business = businessRepository.findById(request.businessId()).get();
         Floor floors = mapper.toFloor(request);
 
@@ -55,6 +55,14 @@ public class FloorServiceImpl implements FloorService {
     }
 
     @Override
+    public List<FloorResponse> getAll(UUID businessUuid) {
+        verifyBusiness(businessUuid);
+        List<Floor> byBusinessUuid = floorsRepository.findByBusinessUuid(businessUuid);
+        List<FloorResponse> list = byBusinessUuid.stream().map(mapper::toFloorResponse).toList();
+        return list;
+    }
+
+    @Override
     public void deleteById(UUID uuid) {
         verifyById(uuid);
         floorsRepository.deleteById(uuid);
@@ -64,6 +72,12 @@ public class FloorServiceImpl implements FloorService {
     public void verifyById(UUID uuid) {
         if (!floorsRepository.existsById(uuid)) {
             throw new FloorNoFoundException("Floor with id: " + uuid + " not Found");
+        }
+    }
+
+    private void verifyBusiness(UUID businessUuid) {
+        if (!businessRepository.existsById(businessUuid)){
+            throw new BusinessNotFoundException("Business not found!");
         }
     }
 }
