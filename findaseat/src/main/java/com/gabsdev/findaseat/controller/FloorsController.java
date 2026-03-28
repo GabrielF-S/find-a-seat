@@ -19,9 +19,9 @@ public interface FloorsController {
     ResponseEntity<Floor> createFloor(@RequestBody FloorRequest request);
 
     @GetMapping(value = "/{uuid}")
-    ResponseEntity<Floor> getFlorById(@PathVariable UUID uuid);
+    ResponseEntity<Floor> getFloorById(@PathVariable UUID uuid);
 
-    @GetMapping(value = "/{businessUuid}")
+    @GetMapping(value = "/{businessUuid}/getAll")
     ResponseEntity<List<FloorResponse>> getAllFloors(@PathVariable UUID businessUuid);
 
 

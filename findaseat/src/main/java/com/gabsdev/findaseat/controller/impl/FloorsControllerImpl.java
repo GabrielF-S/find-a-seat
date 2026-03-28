@@ -33,7 +33,7 @@ public class FloorsControllerImpl implements FloorsController {
     }
 
     @Override
-    public ResponseEntity<Floor> getFlorById(UUID uuid) {
+    public ResponseEntity<Floor> getFloorById(UUID uuid) {
         return ResponseEntity.ok(service.getById(uuid));
     }
 
