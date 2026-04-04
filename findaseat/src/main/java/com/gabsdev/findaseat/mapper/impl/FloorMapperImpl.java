@@ -13,14 +13,15 @@ public class FloorMapperImpl implements FloorMapper {
 
     @Override
     public Floor toFloor(FloorRequest request) {
-        return new Floor(request.floorName());
+        return new Floor(request.floorNumber() + "° andar", request.towerName());
     }
 
     @Override
     public FloorResponse toFloorResponse(Floor floor) {
         return new FloorResponse(floor.getId(), floor.getFloorName(), floor.getSlug(),
                 new BusinessResponse(
-                        floor.getBusiness().getUuid(), floor.getFloorName(), floor.getBusiness().getLocation())
+                        floor.getBusiness().getUuid(), floor.getBusiness().getBusinessName(), floor.getBusiness().getLocation())
+
         );
     }
 }

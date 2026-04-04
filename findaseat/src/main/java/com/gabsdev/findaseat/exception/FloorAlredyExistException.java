@@ -15,7 +15,7 @@ public class FloorAlredyExistException extends FindASetException {
 
     @Override
     public ProblemDetail toProblemDetail() {
-        var pb = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, detail);
+        var pb = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, detail);
         pb.setTitle("Floor Exception");
         pb.setType(URI.create("errors/resource-already-exist"));
         pb.setProperty("timestamp", Instant.now());

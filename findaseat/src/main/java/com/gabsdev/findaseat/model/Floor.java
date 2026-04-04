@@ -12,6 +12,7 @@ public class Floor {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    private String towerName;
     private String floorName;
     private String slug;
     @ManyToOne
@@ -21,20 +22,23 @@ public class Floor {
     public Floor() {
     }
 
-    public Floor(String floorName) {
+    public Floor(String floorName, String towerName) {
         this.floorName = floorName;
+        this.towerName = towerName;
     }
 
-    public Floor(String floorName, String slug) {
+    public Floor(String floorName, String slug, String towerName) {
         this.floorName = floorName;
         this.slug = slug;
+        this.towerName = towerName;
     }
 
-    public Floor(UUID id, String floorName, String slug, Business business, List<Seat> seatList) {
+    public Floor(UUID id, String floorName, String slug, Business business, List<Seat> seatList, String towerName) {
         this.id = id;
         this.floorName = floorName;
         this.slug = slug;
         this.business = business;
+        this.towerName = towerName;
     }
 
     public UUID getId() {
@@ -61,6 +65,13 @@ public class Floor {
         this.slug = slug;
     }
 
+    public String getTowerName() {
+        return towerName;
+    }
+
+    public void setTowerName(String towerName) {
+        this.towerName = towerName;
+    }
 
     public Business getBusiness() {
         return business;
