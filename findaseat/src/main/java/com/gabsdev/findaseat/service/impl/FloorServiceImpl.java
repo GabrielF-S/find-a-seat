@@ -35,14 +35,14 @@ public class FloorServiceImpl implements FloorService {
     @Override
     public Floor creteFloor(FloorRequest request) {
         verifyBusiness(request.businessId());
-        if (floorsRepository.existsByfloorName(request.floorName())) {
-            throw new FloorAlredyExistException("Floor "+ request.floorName() +" Already exists");
+        if (floorsRepository.existsByfloorName(request.floorNumber() + "° andar") && floorsRepository.existsBytowerName(request.towerName())) {
+            throw new FloorAlredyExistException("Floor "+ request.floorNumber() +" Already exists");
         }
         Business business = businessRepository.findById(request.businessId()).get();
         Floor floors = mapper.toFloor(request);
 
         floors.setBusiness(business);
-        floors.setSlug(slugify.slugify(business.getBusinessName() + " " + floors.getFloorName()));
+        floors.setSlug(slugify.slugify(business.getBusinessName()+" " + request.towerName() + " " + floors.getFloorName()));
         return floorsRepository.save(floors);
     }
 
