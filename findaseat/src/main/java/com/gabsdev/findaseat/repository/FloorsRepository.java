@@ -10,7 +10,7 @@ public interface FloorsRepository extends JpaRepository<Floor, UUID> {
 
     List<Floor> findByBusinessUuid(UUID businessUuid);
 
-    boolean existsByfloorName(String floorName);
+    boolean existsByfloorNameAndBusinessUuidAndTowerName(String floorName, UUID uuid, String string);
 
     boolean existsBytowerName(String s);
 }

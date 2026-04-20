@@ -3,6 +3,8 @@ package com.gabsdev.findaseat.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,20 +15,23 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String seatName;
+    private String nick;
     private String slug;
     private Status status;
     private boolean exclusive;
+    @CreationTimestamp
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime updatedAt;
     @ManyToOne
     @JoinColumn(name = "tb_floors_id")
-    private Floors floors;
+    private Floor floor;
 
     public Seat(Long id, String seatName, String slug,
                 Status status, boolean exclusive, LocalDateTime createdAt,
-                LocalDateTime updatedAt, Floors floors) {
+                LocalDateTime updatedAt, Floor floors) {
         this.id = id;
         this.seatName = seatName;
         this.slug = slug;
@@ -34,18 +39,36 @@ public class Seat {
         this.exclusive = exclusive;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.floors = floors;
+        this.floor = floors;
     }
 
     public Seat() {
     }
 
-    public Floors getFloors() {
-        return floors;
+    public Seat(String name, String nick, boolean exclusive) {
+        this.seatName = name;
+        this.exclusive = exclusive;
+        this.status = Status.AVALIABLE;
+
     }
 
-    public void setFloors(Floors floors) {
-        this.floors = floors;
+    public Seat(boolean exclusive) {
+        this.exclusive = exclusive;
+    }
+
+    public Seat(String nick, Status status, boolean exclusive, Floor floor) {
+        this.nick = nick;
+        this.status = status;
+        this.exclusive = exclusive;
+        this.floor = floor;
+    }
+
+    public Floor getFloors() {
+        return floor;
+    }
+
+    public void setFloors(Floor floors) {
+        this.floor = floors;
     }
 
     public Seat(String seatName, String slug, Status status, boolean exclusive, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -79,6 +102,14 @@ public class Seat {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 
     public Status getStatus() {
