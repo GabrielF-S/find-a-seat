@@ -35,7 +35,7 @@ public class FloorServiceImpl implements FloorService {
     @Override
     public Floor creteFloor(FloorRequest request) {
         verifyBusiness(request.businessId());
-        if (floorsRepository.existsByfloorName(request.floorNumber() + "° andar") && floorsRepository.existsBytowerName(request.towerName())) {
+        if (floorsRepository.existsByfloorNameAndBusinessUuidAndTowerName(request.floorNumber() + "° andar",request.businessId(), request.towerName())) {
             throw new FloorAlredyExistException("Floor "+ request.floorNumber() +" Already exists");
         }
         Business business = businessRepository.findById(request.businessId()).get();
