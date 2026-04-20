@@ -16,7 +16,7 @@ public class User {
     private List<String> roles;
     @OneToOne
     @JoinColumn(name = "tb_employees_id")
-    private Employees employees;
+    private Employee employees;
 
     public User() {
     }
@@ -59,11 +59,11 @@ public class User {
         this.roles = roles;
     }
 
-    public Employees getEmployees() {
+    public Employee getEmployees() {
         return employees;
     }
 
-    public void setEmployees(Employees employees) {
+    public void setEmployees(Employee employees) {
         this.employees = employees;
     }
 }
