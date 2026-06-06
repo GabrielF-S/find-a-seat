@@ -6,7 +6,6 @@ import com.gabsdev.findaseat.mapper.SeatMapper;
 import com.gabsdev.findaseat.model.Floor;
 import com.gabsdev.findaseat.model.Seat;
 import com.gabsdev.findaseat.model.Status;
-import com.github.slugify.Slugify;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,7 +18,7 @@ public class SeatMapperImpl implements SeatMapper {
 
     @Override
     public SeatResponse toSeatResponse(Seat seat) {
-        return new SeatResponse(seat.getSeatName(), seat.getSlug(), seat.getNick(),seat.getStatus(), seat.getFloors().getFloorName());
+        return new SeatResponse(seat.getId(),seat.getSeatName(), seat.getSlug(), seat.getNick(),seat.getStatus(), seat.getFloors().getFloorName());
     }
 
 

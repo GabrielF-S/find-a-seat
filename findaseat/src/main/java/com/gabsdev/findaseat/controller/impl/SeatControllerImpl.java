@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,18 +34,18 @@ public class SeatControllerImpl implements SeatController {
     }
 
     @Override
-    public ResponseEntity<Seat> getSeatById(UUID businessUuid , Long id) {
-        return ResponseEntity.ok(seatService.getSeatById(businessUuid,id));
+    public ResponseEntity<Seat> getSeatById(UUID businessUuid , UUID id, LocalDate localDate) {
+        return ResponseEntity.ok(seatService.getSeatById(businessUuid,id, localDate));
     }
 
     @Override
-    public ResponseEntity<List<SeatResponse>> getAllSeat(UUID businessUuid) {
-        return ResponseEntity.ok(seatService.getAllBusinessSeat(businessUuid));
+    public ResponseEntity<List<SeatResponse>> getAllSeat(UUID businessUuid, LocalDate localDate) {
+        return ResponseEntity.ok(seatService.getAllBusinessSeat(businessUuid, localDate));
     }
 
     @Override
-    public ResponseEntity<List<SeatResponse>> getAllSeatByFloor(UUID floorUuid) {
-        return ResponseEntity.ok(seatService.getAllSeatSByFloor(floorUuid));
+    public ResponseEntity<List<SeatResponse>> getAllSeatByFloor(UUID floorUuid, LocalDate localDate) {
+        return ResponseEntity.ok(seatService.getAllSeatSByFloor(floorUuid, localDate));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class SeatControllerImpl implements SeatController {
     }
 
     @Override
-    public ResponseEntity<Void> deleteSeat(UUID businessUuid ,Long id) {
+    public ResponseEntity<Void> deleteSeat(UUID businessUuid ,UUID id) {
         seatService.deleteByBusinessIuudAndSeatId(businessUuid,id);
         return ResponseEntity.noContent().build();
     }

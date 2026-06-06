@@ -1,9 +1,7 @@
 package com.gabsdev.findaseat.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -12,8 +10,8 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
-    private LocalDateTime dateTime;
+    @Embedded
+    private Date date;
     @ManyToOne
     @JoinColumn(name = "seat_id")
     private Seat seat;
@@ -26,9 +24,9 @@ public class Reservation {
 
     }
 
-    public Reservation(UUID id, LocalDateTime dateTime, Seat seat, Employee employees) {
+    public Reservation(UUID id, Date date, Seat seat, Employee employees) {
         this.id = id;
-        this.dateTime = dateTime;
+        this.date = date;
         this.seat = seat;
         this.employees = employees;
     }
@@ -41,12 +39,12 @@ public class Reservation {
         this.id = id;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
+    public Date getDate() {
+        return date;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public Seat getSeat() {

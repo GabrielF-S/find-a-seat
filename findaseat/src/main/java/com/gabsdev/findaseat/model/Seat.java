@@ -7,13 +7,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tb_seats")
 public class Seat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private String seatName;
     private String nick;
     private String slug;
@@ -29,7 +30,7 @@ public class Seat {
     @JoinColumn(name = "tb_floors_id")
     private Floor floor;
 
-    public Seat(Long id, String seatName, String slug,
+    public Seat(UUID id, String seatName, String slug,
                 Status status, boolean exclusive, LocalDateTime createdAt,
                 LocalDateTime updatedAt, Floor floors) {
         this.id = id;
@@ -80,11 +81,11 @@ public class Seat {
         this.updatedAt = updatedAt;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

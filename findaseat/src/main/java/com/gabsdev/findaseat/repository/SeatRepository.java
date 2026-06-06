@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface SeatRepository extends JpaRepository<Seat, Long> {
+public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
 
 
-    Seat findByIdAndFloor_BusinessUuid(Long id, UUID businessUuid);
+    Seat findByIdAndFloor_BusinessUuid(UUID id, UUID businessUuid);
 
     List<Seat> findByFloor_BusinessUuid(UUID businessUuid);
 
