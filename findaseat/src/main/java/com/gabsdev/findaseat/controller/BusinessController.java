@@ -2,7 +2,7 @@ package com.gabsdev.findaseat.controller;
 
 import com.gabsdev.findaseat.dto.request.BusinessRequest;
 import com.gabsdev.findaseat.dto.response.BusinessResponse;
-import com.gabsdev.findaseat.model.Business;
+import com.gabsdev.findaseat.model.entity.Business;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.http.ResponseEntity;

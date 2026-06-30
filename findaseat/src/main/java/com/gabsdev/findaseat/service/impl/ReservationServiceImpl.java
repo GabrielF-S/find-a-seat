@@ -2,13 +2,11 @@ package com.gabsdev.findaseat.service.impl;
 
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
-import com.gabsdev.findaseat.exception.ConflictReservationException;
-import com.gabsdev.findaseat.exception.EmployeeNotFoundException;
-import com.gabsdev.findaseat.exception.ReservationNotFoundException;
-import com.gabsdev.findaseat.exception.SeatNotFoundException;
+import com.gabsdev.findaseat.exception.*;
 import com.gabsdev.findaseat.mapper.ReservationMapper;
-import com.gabsdev.findaseat.model.Date;
-import com.gabsdev.findaseat.model.Reservation;
+import com.gabsdev.findaseat.model.entity.Date;
+import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.repository.ReservationRepository;
 import com.gabsdev.findaseat.repository.SeatRepository;
@@ -16,6 +14,8 @@ import com.gabsdev.findaseat.service.ReservationService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,11 +38,44 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     @Override
-    public ReservationResponse createReservation(ReservationRequest reservation) {
-        verifyReservationDate(reservation);
-        Reservation reservationToSave = getReservation(reservation);
+    public ReservationResponse createReservation(ReservationRequest reservation, LocalTime start, LocalTime end) {
+        verifyEmployeeAbleToReserve(reservation);
+        Date date = difineDate(reservation, start, end);
+        verifyReservationDate(reservation, date);
+        Reservation reservationToSave = getReservation(reservation, date);
         Reservation saved = repository.save(reservationToSave);
         return mapper.toReservationResponse(saved);
+
+    }
+
+    private Date difineDate(ReservationRequest reservation, LocalTime start, LocalTime end) {
+        Type type = verifySeatType(reservation.seatId());
+        if (type.name().equals("desk")){
+            start = LocalTime.parse("08:00");
+            end = LocalTime.parse("18:00");
+        }
+        return new Date(reservation.date(),start,end);
+    }
+
+    private Type verifySeatType(UUID uuid) {
+        if (seatRepository.existsById(uuid)){
+            return  seatRepository.findById(uuid).get().getType();
+        }
+        throw new SeatNotFoundException("Seat not found");
+
+    }
+
+    private void verifyEmployeeAbleToReserve(ReservationRequest reservation) {
+        Type type = seatRepository.findById(reservation.seatId()).get().getType();
+        if (repository.existsByEmployees_idAndActiveTrue(reservation.employeId())){
+          List<Reservation> reservationList =  repository.findByEmployees_idAndActiveTrue(reservation.employeId());
+            if (reservationList.stream().anyMatch(reservation1 -> reservation1.getSeat().getType() == type)) {
+                throw new ReservationConflictException("Já possui uma reserva de "
+                        + type.name() +
+                        " Ativa, finalize ela para poder realizar uma nova reserva");
+            }
+
+        }
 
     }
 
@@ -72,31 +105,76 @@ public class ReservationServiceImpl implements ReservationService {
         repository.deleteById(uuid);
     }
 
+    @Override
+    public List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date) {
+        if (date!= null){
+            List<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndDate_reservationDay(seatId, date);
+            return bySeatIdAndDateReservationDay.stream().map(mapper::toReservationResponse).toList();
+        }
+       List<Reservation> reservation = repository.findBySeat_Id(seatId);
+        return reservation.stream().map(mapper::toReservationResponse).toList();
+    }
+
+    @Override
+    public List<ReservationResponse> getByDay(LocalDate localDate) {
+        if (localDate == null){
+            localDate = LocalDate.now();
+        }
+        List<Reservation> byDateReservationDay = repository.findByDate_reservationDay(localDate);
+        return  byDateReservationDay.stream().map(mapper::toReservationResponse).toList();
+    }
+
+    @Override
+    public ReservationResponse close(UUID uuid) {
+        Reservation reservation = repository.findById(uuid).get();
+        reservation.getDate().setEndTimeLocation(LocalTime.now());
+        return mapper.toReservationResponse(repository.save(reservation));
+    }
+
     private ReservationResponse findById(UUID reservationId) {
         Reservation reservation = repository.findById(reservationId).orElseThrow(() -> new ReservationNotFoundException("Reserva não localizada"));
         return mapper.toReservationResponse(reservation);
     }
 
-    private void verifyReservationDate(ReservationRequest reservation) {
-        if (repository.existsByDate_ReservationDay(reservation.data().getReservationDay())){
-            Date date = repository.findByDate(reservation.data().getReservationDay());
-            if (reservation.data().getStartTimeLocation().isAfter(date.getEndTimeLocation())){
-                throw new ConflictReservationException("Há um conflito de horário entre as reservas");
-            }
+    private void verifyReservationDate(ReservationRequest reservation, Date date) {
+        if(repository.existsBySeat_IdAndDate_reservationDay(reservation.seatId(),
+                reservation.date())){
+            List<Reservation> reservationList = repository.findBySeat_IdAndDate_reservationDay(reservation.seatId(),
+                    reservation.date());
+            reservationList.forEach(r -> verifyDate(r, reservation, date));
+
+        }
+
+    }
+
+    private void verifyDate(Reservation r, ReservationRequest reservation, Date date) {
+        if (!
+                date.getStartTimeLocation().isAfter(r.getDate().getEndTimeLocation()) ||
+                date.getEndTimeLocation().isBefore(r.getDate().getStartTimeLocation())
+        ){
+            throw new ConflictReservationException("Há um conflito de horário entre as reservas");
         }
     }
 
-    private Reservation getReservation(ReservationRequest reservation) {
+    private Reservation getReservation(ReservationRequest reservation, Date date) {
         Reservation reservationToSave = new Reservation();
-        if (!seatRepository.existsById(reservation.seatId())){
-            throw  new SeatNotFoundException("Não foi localizado um seat de ID: " + reservation.seatId());
-        }
+        verifySeat(reservation);
         reservationToSave.setSeat(seatRepository.findById(reservation.seatId()).get());
+        verifyEmployee(reservation);
+        reservationToSave.setEmployees(employeeRepository.getReferenceById(reservation.employeId()));
+        reservationToSave.setDate(date);
+        return reservationToSave;
+    }
+
+    private void verifyEmployee(ReservationRequest reservation) {
         if (!employeeRepository.existsById(reservation.employeId())){
             throw new EmployeeNotFoundException("Funcionario não localizado!");
         }
-        reservationToSave.setEmployees(employeeRepository.getReferenceById(reservation.employeId()));
-        reservationToSave.setDate(reservation.data());
-        return reservationToSave;
+    }
+
+    private void verifySeat(ReservationRequest reservation) {
+        if (!seatRepository.existsById(reservation.seatId())){
+            throw  new SeatNotFoundException("Não foi localizado um seat de ID: " + reservation.seatId());
+        }
     }
 }

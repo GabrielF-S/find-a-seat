@@ -2,14 +2,12 @@ package com.gabsdev.findaseat.service.impl;
 
 import com.gabsdev.findaseat.dto.request.SeatRequest;
 import com.gabsdev.findaseat.dto.response.SeatResponse;
-import com.gabsdev.findaseat.exception.BusinessNotFoundException;
-import com.gabsdev.findaseat.exception.FloorNoFoundException;
-import com.gabsdev.findaseat.exception.SeatAlredyExistException;
-import com.gabsdev.findaseat.exception.SeatNotFoundException;
+import com.gabsdev.findaseat.exception.*;
 import com.gabsdev.findaseat.mapper.SeatMapper;
-import com.gabsdev.findaseat.model.Floor;
-import com.gabsdev.findaseat.model.Seat;
-import com.gabsdev.findaseat.model.Status;
+import com.gabsdev.findaseat.model.entity.Floor;
+import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.entity.Seat;
+import com.gabsdev.findaseat.model.enums.Status;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.repository.FloorsRepository;
 import com.gabsdev.findaseat.repository.ReservationRepository;
@@ -47,15 +45,30 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public Seat createSeat(SeatRequest seatRequest) {
+        verifyNumberofSeats(seatRequest);
         verifyFloorById(seatRequest.floorId());
-        Floor floor = floorsRepository.findById(seatRequest.floorId()).get();
+        Floor floor = floorsRepository.findById(seatRequest.floorId())
+                .orElseThrow(()-> new FloorNoFoundException("Seat Not found"));
         Seat seat = mapper.toSeat(seatRequest, floor);
         seat.setSeatName(slugify.slugify(seatRequest.type().name() + " " +
                 seatRequest.number()));
-        seat.setSlug(slugify.slugify(seat.getFloors().getSlug() + " " +
+        seat.setSlug(slugify.slugify(seat.getFloor().getSlug() + " " +
                 seat.getSeatName()));
         verifiExistsSeat(seat);
         return seatRepository.save(seat);
+    }
+
+    private void verifyNumberofSeats(SeatRequest seatRequest) {
+        if((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()>1 ) &&
+                (seatRequest.type().name().equalsIgnoreCase("seat") ||
+                seatRequest.type().name().equalsIgnoreCase("desk") )){
+            throw new NumberOfSeatsException("The number of seats most be 1 for a" + seatRequest.type().name());
+        } else if ((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()<2 )&&
+                (seatRequest.type().name().equalsIgnoreCase("room") ||
+                seatRequest.type().name().equalsIgnoreCase("table"))) {
+            throw new NumberOfSeatsException("Is required define a number of seats bigger that 1 for a " + seatRequest.type().name());
+
+        }
     }
 
 
@@ -63,10 +76,7 @@ public class SeatServiceImpl implements SeatService {
     public Seat getSeatById(UUID businessUuid, UUID id, LocalDate localDate) {
         verifyBusinessById(businessUuid);
         verifySeatById(id);
-        Seat seat = seatRepository.findByIdAndFloor_BusinessUuid(id, businessUuid);
-        seat.getFloors().getBusiness().getUuid();
-        seat = verifyReservation(seat, localDate);
-        return seat;
+        return verifyReservation(seatRepository.findByIdAndFloor_BusinessUuid(id, businessUuid), localDate);
     }
 
     @Override
@@ -82,7 +92,12 @@ public class SeatServiceImpl implements SeatService {
             localDate = LocalDate.now();
         }
         if(reservationRepository.existsBySeat_IdAndDate_reservationDay(seat.getId(), localDate)){
-            seat.setStatus(Status.RESERVED);
+
+            List<Reservation> bySeatIdAndDateReservationDay = reservationRepository.findBySeat_IdAndDate_reservationDay(seat.getId(), localDate);
+            if (bySeatIdAndDateReservationDay.stream().anyMatch(Reservation::isActive)) {
+                seat.setStatus(Status.RESERVED);
+            }
+
         }
         return seat;
     }
@@ -128,15 +143,11 @@ public class SeatServiceImpl implements SeatService {
 
     private void verifiExistsSeat(Seat seat) {
         if (seatRepository
-                .existsBySeatNameAndFloorId(seat.getSeatName(),seat.getFloors().getId())
+                .existsBySeatNameAndFloorId(seat.getSeatName(),seat.getFloor().getId())
         ) {
             throw new SeatAlredyExistException("Seat already exist");
         }
     }
 
-    public void teste(){
 
-        LocalDate now = LocalDate.now();
-
-    }
 }

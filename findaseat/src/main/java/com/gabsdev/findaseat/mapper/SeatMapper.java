@@ -2,8 +2,8 @@ package com.gabsdev.findaseat.mapper;
 
 import com.gabsdev.findaseat.dto.request.SeatRequest;
 import com.gabsdev.findaseat.dto.response.SeatResponse;
-import com.gabsdev.findaseat.model.Floor;
-import com.gabsdev.findaseat.model.Seat;
+import com.gabsdev.findaseat.model.entity.Floor;
+import com.gabsdev.findaseat.model.entity.Seat;
 
 public interface SeatMapper {
 

@@ -4,7 +4,7 @@ import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.BusinessResponse;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.mapper.FloorMapper;
-import com.gabsdev.findaseat.model.Floor;
+import com.gabsdev.findaseat.model.entity.Floor;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +13,10 @@ public class FloorMapperImpl implements FloorMapper {
 
     @Override
     public Floor toFloor(FloorRequest request) {
-        return new Floor(request.floorNumber() + "° andar", request.towerName());
+        return Floor.builder()
+                .floorName(request.floorNumber() + "° andar")
+                .towerName(request.towerName())
+                .build();
     }
 
     @Override

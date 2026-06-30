@@ -2,7 +2,7 @@ package com.gabsdev.findaseat.service;
 
 import com.gabsdev.findaseat.dto.request.SeatRequest;
 import com.gabsdev.findaseat.dto.response.SeatResponse;
-import com.gabsdev.findaseat.model.Seat;
+import com.gabsdev.findaseat.model.entity.Seat;
 
 import java.time.LocalDate;
 import java.util.List;

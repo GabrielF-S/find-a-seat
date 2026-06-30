@@ -1,12 +1,16 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
+import com.gabsdev.findaseat.model.enums.BusinessType;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "tb_business")
+@Data
+@Builder
 public class Business {
 
     @Id
@@ -15,6 +19,7 @@ public class Business {
     private String businessName;
     @Embedded
     private Location location;
+    private BusinessType businessType;
 
     public Business() {
 
@@ -26,28 +31,9 @@ public class Business {
         this.location = location;
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
+    public Business(UUID uuid, String businessName, Location location) {
         this.uuid = uuid;
-    }
-
-    public String getBusinessName() {
-        return businessName;
-    }
-
-    public void setBusinessName(String businessName) {
         this.businessName = businessName;
-    }
-
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
         this.location = location;
     }
 }

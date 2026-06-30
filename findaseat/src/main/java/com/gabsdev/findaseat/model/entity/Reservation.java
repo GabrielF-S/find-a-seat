@@ -1,11 +1,16 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "tb_reservation")
+@Data
+@Builder
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -19,6 +24,9 @@ public class Reservation {
     @JoinColumn(name = "tb_employees_id")
     private Employee employees;
 
+    private boolean active;
+
+
 
     public Reservation() {
 
@@ -31,35 +39,17 @@ public class Reservation {
         this.employees = employees;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
+    public Reservation(UUID id, Date date, Seat seat, Employee employees, boolean active) {
         this.id = id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
         this.date = date;
-    }
-
-    public Seat getSeat() {
-        return seat;
-    }
-
-    public void setSeat(Seat seat) {
         this.seat = seat;
-    }
-
-    public Employee getEmployees() {
-        return employees;
-    }
-
-    public void setEmployees(Employee employees) {
         this.employees = employees;
+        this.active = active;
     }
+
+    public boolean isActive() {
+        return getDate().getEndTimeLocation().isAfter(LocalTime.now());
+    }
+
+
 }
