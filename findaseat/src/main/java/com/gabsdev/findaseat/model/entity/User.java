@@ -1,11 +1,15 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 import java.util.UUID;
 @Entity
 @Table(name = "tb_users")
+@Builder
+@Data
 public class User {
 
     @Id
@@ -27,43 +31,18 @@ public class User {
         this.roles = roles;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
+    public User(String email, String password, List<String> roles, Employee employee) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<String> roles) {
         this.roles = roles;
+        this.employees = employee;
     }
 
-    public Employee getEmployees() {
-        return employees;
-    }
-
-    public void setEmployees(Employee employees) {
+    public User(UUID id, String email, String password, List<String> roles, Employee employees) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
         this.employees = employees;
     }
 }

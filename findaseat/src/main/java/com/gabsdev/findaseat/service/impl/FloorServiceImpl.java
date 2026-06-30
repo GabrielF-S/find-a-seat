@@ -5,9 +5,10 @@ import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.exception.FloorAlredyExistException;
 import com.gabsdev.findaseat.exception.FloorNoFoundException;
+import com.gabsdev.findaseat.exception.SeatNotFoundException;
 import com.gabsdev.findaseat.mapper.FloorMapper;
-import com.gabsdev.findaseat.model.Business;
-import com.gabsdev.findaseat.model.Floor;
+import com.gabsdev.findaseat.model.entity.Business;
+import com.gabsdev.findaseat.model.entity.Floor;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.repository.FloorsRepository;
 import com.gabsdev.findaseat.service.FloorService;
@@ -15,6 +16,7 @@ import com.github.slugify.Slugify;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -70,6 +72,16 @@ public class FloorServiceImpl implements FloorService {
         verifyById(uuid);
         floorsRepository.deleteById(uuid);
 
+    }
+
+    @Override
+    public Floor insertLayout(UUID uuid, String layout) {
+        if (!floorsRepository.existsById(uuid)){
+            throw new SeatNotFoundException("Seat not found");
+        }
+        Floor floor = floorsRepository.findById(uuid).get();
+        floor.setLayout(layout);
+        return floorsRepository.save(floor);
     }
 
     public void verifyById(UUID uuid) {

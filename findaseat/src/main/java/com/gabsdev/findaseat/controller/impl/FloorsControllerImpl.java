@@ -3,7 +3,7 @@ package com.gabsdev.findaseat.controller.impl;
 import com.gabsdev.findaseat.controller.FloorsController;
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
-import com.gabsdev.findaseat.model.Floor;
+import com.gabsdev.findaseat.model.entity.Floor;
 import com.gabsdev.findaseat.service.FloorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +29,7 @@ public class FloorsControllerImpl implements FloorsController {
     public ResponseEntity<Floor> createFloor(FloorRequest request) {
         Floor creted = service.creteFloor(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(creted.getId()).toUri();
+
         return ResponseEntity.created(uri).build();
     }
 
@@ -46,6 +47,11 @@ public class FloorsControllerImpl implements FloorsController {
     public ResponseEntity<Floor> updateFloor(Floor floor) {
 
         return ResponseEntity.ok(service.updateFloor(floor));
+    }
+
+    @Override
+    public ResponseEntity<Floor> insertLayout(UUID uuid, String layout) {
+        return ResponseEntity.ok(service.insertLayout(uuid, layout));
     }
 
     @Override

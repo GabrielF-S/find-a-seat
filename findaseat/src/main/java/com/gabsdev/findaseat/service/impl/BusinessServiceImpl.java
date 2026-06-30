@@ -2,9 +2,10 @@ package com.gabsdev.findaseat.service.impl;
 
 import com.gabsdev.findaseat.dto.request.BusinessRequest;
 import com.gabsdev.findaseat.dto.response.BusinessResponse;
+import com.gabsdev.findaseat.exception.BusinessExistsException;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.mapper.BusinessMapper;
-import com.gabsdev.findaseat.model.Business;
+import com.gabsdev.findaseat.model.entity.Business;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.service.BusinessService;
 import org.springframework.stereotype.Service;
@@ -25,9 +26,17 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public BusinessResponse createBusiness(BusinessRequest business) {
+        verifyBusinessName(business);
         Business businessToSave = mapper.toBusiness(business);
         Business businessSaved = repository.save(businessToSave);
         return mapper.toBusinessResponse(businessSaved) ;
+    }
+
+    private void verifyBusinessName(BusinessRequest business) {
+
+        if (repository.existsByBusinessNameAndLocation(business.businessName(), business.location())){
+            throw new BusinessExistsException("Já existe cadastro para empresa com esse nome");
+        }
     }
 
     @Override

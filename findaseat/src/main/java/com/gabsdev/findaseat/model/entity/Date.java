@@ -1,11 +1,15 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Embeddable;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 @Embeddable
+@Data
+@Builder
 public class Date {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
@@ -21,30 +25,6 @@ public class Date {
     public Date(LocalDate date, LocalTime startTimeLocation, LocalTime endTimeLocation) {
         this.reservationDay = date;
         this.startTimeLocation = startTimeLocation;
-        this.endTimeLocation = endTimeLocation;
-    }
-
-    public LocalDate getReservationDay() {
-        return reservationDay;
-    }
-
-    public void setReservationDay(LocalDate reservationDay) {
-        this.reservationDay = reservationDay;
-    }
-
-    public LocalTime getStartTimeLocation() {
-        return startTimeLocation;
-    }
-
-    public void setStartTimeLocation(LocalTime startTimeLocation) {
-        this.startTimeLocation = startTimeLocation;
-    }
-
-    public LocalTime getEndTimeLocation() {
-        return endTimeLocation;
-    }
-
-    public void setEndTimeLocation(LocalTime endTimeLocation) {
         this.endTimeLocation = endTimeLocation;
     }
 

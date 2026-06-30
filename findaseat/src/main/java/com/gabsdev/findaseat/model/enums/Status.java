@@ -1,4 +1,4 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.enums;
 
 public enum Status {
     AVALIABLE(1L, "avaliable"),

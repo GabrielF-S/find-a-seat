@@ -3,7 +3,7 @@ package com.gabsdev.findaseat.controller.impl;
 import com.gabsdev.findaseat.controller.SeatController;
 import com.gabsdev.findaseat.dto.request.SeatRequest;
 import com.gabsdev.findaseat.dto.response.SeatResponse;
-import com.gabsdev.findaseat.model.Seat;
+import com.gabsdev.findaseat.model.entity.Seat;
 import com.gabsdev.findaseat.service.SeatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,8 @@ public class SeatControllerImpl implements SeatController {
     @Override
     public ResponseEntity<Seat> createSeat(SeatRequest seatRequest) {
         Seat seatCreated = seatService.createSeat(seatRequest);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(seatCreated.getId()).toUri();
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(seatCreated.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }
 

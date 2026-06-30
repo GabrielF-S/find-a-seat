@@ -1,8 +1,7 @@
 package com.gabsdev.findaseat.dto.request;
 
-import com.gabsdev.findaseat.model.Date;
-
+import java.time.LocalDate;
 import java.util.UUID;
 
-public record ReservationRequest(Date data, UUID seatId, Long employeId) {
+public record ReservationRequest(LocalDate date, UUID seatId, Long employeId) {
 }

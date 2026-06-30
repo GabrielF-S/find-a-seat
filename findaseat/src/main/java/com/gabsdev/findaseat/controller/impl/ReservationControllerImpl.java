@@ -3,7 +3,7 @@ package com.gabsdev.findaseat.controller.impl;
 import com.gabsdev.findaseat.controller.ReservationController;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
-import com.gabsdev.findaseat.model.Reservation;
+import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.service.ReservationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +12,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,10 +27,12 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> makeReservation(ReservationRequest reservation) {
-        ReservationResponse reservationCreated = service.createReservation(reservation);
+    public ResponseEntity<ReservationResponse> makeReservation(
+            ReservationRequest reservation, LocalTime start, LocalTime end
+    ) {
+        ReservationResponse reservationCreated = service.createReservation(reservation, start, end);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("{id}").buildAndExpand(reservationCreated.id()).toUri();
+                .path("/{id}").buildAndExpand(reservationCreated.id()).toUri();
         return ResponseEntity.created(uri).build();
     }
 
@@ -39,13 +43,23 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> getReservationSeat(UUID seatId, LocalDate date) {
-        return null;
+    public ResponseEntity<List<ReservationResponse>> getReservationSeat(UUID seatId, LocalDate date) {
+        return ResponseEntity.ok(service.getBySeatAndData(seatId, date));
+    }
+
+    @Override
+    public ResponseEntity<List<ReservationResponse>> getReservationByDay(LocalDate localDate) {
+        return ResponseEntity.ok(service.getByDay(localDate));
     }
 
     @Override
     public ResponseEntity<ReservationResponse> updateReservation(Reservation reservation) {
         return ResponseEntity.ok(service.updateReservation(reservation));
+    }
+
+    @Override
+    public ResponseEntity<ReservationResponse> closeReservation(UUID uuid) {
+        return ResponseEntity.ok(service.close(uuid));
     }
 
     @Override
