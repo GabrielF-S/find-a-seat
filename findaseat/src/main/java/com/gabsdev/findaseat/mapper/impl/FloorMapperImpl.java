@@ -23,7 +23,7 @@ public class FloorMapperImpl implements FloorMapper {
     public FloorResponse toFloorResponse(Floor floor) {
         return new FloorResponse(floor.getId(), floor.getFloorName(), floor.getSlug(),
                 new BusinessResponse(
-                        floor.getBusiness().getUuid(), floor.getBusiness().getBusinessName(), floor.getBusiness().getLocation())
+                        floor.getBusiness().getUuid(), floor.getBusiness().getBusinessName(), floor.getBusiness().getLocation(), floor.getBusiness().getBusinessType())
 
         );
     }

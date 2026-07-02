@@ -16,7 +16,7 @@ public class Employee {
     private String department;
     private String document;
     @ManyToOne
-    @JoinColumn(name="tb_business_id")
+    @JoinColumn(name="tb_business_uuid")
     private Business business;
 
 

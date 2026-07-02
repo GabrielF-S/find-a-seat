@@ -1,6 +1,7 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
 import jakarta.persistence.*;
+
 
 @Embeddable
 public class Location {
@@ -8,18 +9,19 @@ public class Location {
 
     private String country;
     private String city;
-    private String adress;
+    private String address;
     private String postalCode;
 
     public Location() {
     }
 
-    public Location(String country, String city, String adress, String postalCode) {
+    public Location(String country, String city, String address, String postalCode) {
         this.country = country;
         this.city = city;
-        this.adress = adress;
+        this.address = address;
         this.postalCode = postalCode;
     }
+
 
     public String getCountry() {
         return country;
@@ -37,12 +39,12 @@ public class Location {
         this.city = city;
     }
 
-    public String getAdress() {
-        return adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getPostalCode() {

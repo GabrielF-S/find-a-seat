@@ -19,6 +19,7 @@ public class Business {
     private String businessName;
     @Embedded
     private Location location;
+    @Enumerated(EnumType.STRING)
     private BusinessType businessType;
 
     public Business() {
@@ -35,5 +36,12 @@ public class Business {
         this.uuid = uuid;
         this.businessName = businessName;
         this.location = location;
+    }
+
+    public Business(UUID uuid, String businessName, Location location, BusinessType businessType) {
+        this.uuid = uuid;
+        this.businessName = businessName;
+        this.location = location;
+        this.businessType = businessType;
     }
 }
