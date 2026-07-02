@@ -7,7 +7,7 @@ import com.gabsdev.findaseat.model.entity.Floor;
 public interface FloorMapper {
 
 
-    Floor toFloor(FloorRequest request);
+    Floor toFloor(FloorRequest request, String stringType);
 
     FloorResponse toFloorResponse(Floor floor);
 }
