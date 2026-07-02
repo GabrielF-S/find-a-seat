@@ -1,8 +1,12 @@
-package com.gabsdev.findaseat.model;
+package com.gabsdev.findaseat.model.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.gabsdev.findaseat.model.enums.Status;
+import com.gabsdev.findaseat.model.enums.Type;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,6 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "tb_seats")
+@Builder
+@Data
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -18,6 +24,7 @@ public class Seat {
     private String seatName;
     private String nick;
     private String slug;
+    @Enumerated(EnumType.STRING)
     private Status status;
     private boolean exclusive;
     @CreationTimestamp
@@ -29,10 +36,13 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "tb_floors_id")
     private Floor floor;
+    @Enumerated(EnumType.STRING)
+    private Type type;
+    private Integer seatsQuantity;
 
     public Seat(UUID id, String seatName, String slug,
                 Status status, boolean exclusive, LocalDateTime createdAt,
-                LocalDateTime updatedAt, Floor floors) {
+                LocalDateTime updatedAt, Floor floors, Type type) {
         this.id = id;
         this.seatName = seatName;
         this.slug = slug;
@@ -41,6 +51,7 @@ public class Seat {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.floor = floors;
+        this.type = type;
     }
 
     public Seat() {
@@ -64,13 +75,6 @@ public class Seat {
         this.floor = floor;
     }
 
-    public Floor getFloors() {
-        return floor;
-    }
-
-    public void setFloors(Floor floors) {
-        this.floor = floors;
-    }
 
     public Seat(String seatName, String slug, Status status, boolean exclusive, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.seatName = seatName;
@@ -81,68 +85,18 @@ public class Seat {
         this.updatedAt = updatedAt;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
+    public Seat(UUID id, String seatName, String nick, String slug, Status status, boolean exclusive, LocalDateTime createdAt, LocalDateTime updatedAt, Floor floor, Type type, Integer seatsQuantity) {
         this.id = id;
-    }
-
-    public String getSeatName() {
-        return seatName;
-    }
-
-    public void setSeatName(String seatName) {
         this.seatName = seatName;
-    }
-
-    public String getSlug() {
-        return slug;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
-
-    public String getNick() {
-        return nick;
-    }
-
-    public void setNick(String nick) {
         this.nick = nick;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
+        this.slug = slug;
         this.status = status;
-    }
-
-    public boolean isExclusive() {
-        return exclusive;
-    }
-
-    public void setExclusive(boolean exclusive) {
         this.exclusive = exclusive;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+        this.floor = floor;
+        this.type = type;
+        this.seatsQuantity = seatsQuantity;
     }
 }
 

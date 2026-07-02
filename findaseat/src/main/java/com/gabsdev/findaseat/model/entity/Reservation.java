@@ -16,7 +16,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Embedded
-    private Date date;
+    private ReservationPeriod reservationPeriod;
     @ManyToOne
     @JoinColumn(name = "seat_id")
     private Seat seat;
@@ -32,23 +32,23 @@ public class Reservation {
 
     }
 
-    public Reservation(UUID id, Date date, Seat seat, Employee employees) {
+    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees) {
         this.id = id;
-        this.date = date;
+        this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
     }
 
-    public Reservation(UUID id, Date date, Seat seat, Employee employees, boolean active) {
+    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active) {
         this.id = id;
-        this.date = date;
+        this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
         this.active = active;
     }
 
     public boolean isActive() {
-        return getDate().getEndTimeLocation().isAfter(LocalTime.now());
+        return getReservationPeriod().getEndTimeLocation().isAfter(LocalTime.now());
     }
 
 

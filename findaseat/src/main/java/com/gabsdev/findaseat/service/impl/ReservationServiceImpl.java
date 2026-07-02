@@ -4,7 +4,7 @@ import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.exception.*;
 import com.gabsdev.findaseat.mapper.ReservationMapper;
-import com.gabsdev.findaseat.model.entity.Date;
+import com.gabsdev.findaseat.model.entity.ReservationPeriod;
 import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-
-
 public class ReservationServiceImpl implements ReservationService {
 
 
@@ -40,21 +38,21 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponse createReservation(ReservationRequest reservation, LocalTime start, LocalTime end) {
         verifyEmployeeAbleToReserve(reservation);
-        Date date = difineDate(reservation, start, end);
-        verifyReservationDate(reservation, date);
-        Reservation reservationToSave = getReservation(reservation, date);
+        ReservationPeriod reservationPeriod = difineDate(reservation, start, end);
+        verifyReservationDate(reservation, reservationPeriod);
+        Reservation reservationToSave = getReservation(reservation, reservationPeriod);
         Reservation saved = repository.save(reservationToSave);
         return mapper.toReservationResponse(saved);
 
     }
 
-    private Date difineDate(ReservationRequest reservation, LocalTime start, LocalTime end) {
+    private ReservationPeriod difineDate(ReservationRequest reservation, LocalTime start, LocalTime end) {
         Type type = verifySeatType(reservation.seatId());
         if (type.name().equals("desk")){
             start = LocalTime.parse("08:00");
             end = LocalTime.parse("18:00");
         }
-        return new Date(reservation.date(),start,end);
+        return new ReservationPeriod(reservation.date(),start,end);
     }
 
     private Type verifySeatType(UUID uuid) {
@@ -87,7 +85,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (date== null){
             date = LocalDate.now();
         }
-       Reservation reservation =  repository.findByEmployee_EmployeeNameAndDate_ReservationDay("%"+employeeName+"%", date);
+       Reservation reservation =  repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay("%"+employeeName+"%", date);
         return mapper.toReservationResponse(reservation);
     }
 
@@ -108,7 +106,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date) {
         if (date!= null){
-            List<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndDate_reservationDay(seatId, date);
+            List<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndReservationPeriod_reservationDay(seatId, date);
             return bySeatIdAndDateReservationDay.stream().map(mapper::toReservationResponse).toList();
         }
        List<Reservation> reservation = repository.findBySeat_Id(seatId);
@@ -120,14 +118,14 @@ public class ReservationServiceImpl implements ReservationService {
         if (localDate == null){
             localDate = LocalDate.now();
         }
-        List<Reservation> byDateReservationDay = repository.findByDate_reservationDay(localDate);
+        List<Reservation> byDateReservationDay = repository.findByReservationPeriod_reservationDay(localDate);
         return  byDateReservationDay.stream().map(mapper::toReservationResponse).toList();
     }
 
     @Override
     public ReservationResponse close(UUID uuid) {
         Reservation reservation = repository.findById(uuid).get();
-        reservation.getDate().setEndTimeLocation(LocalTime.now());
+        reservation.getReservationPeriod().setEndTimeLocation(LocalTime.now());
         return mapper.toReservationResponse(repository.save(reservation));
     }
 
@@ -136,33 +134,33 @@ public class ReservationServiceImpl implements ReservationService {
         return mapper.toReservationResponse(reservation);
     }
 
-    private void verifyReservationDate(ReservationRequest reservation, Date date) {
-        if(repository.existsBySeat_IdAndDate_reservationDay(reservation.seatId(),
+    private void verifyReservationDate(ReservationRequest reservation, ReservationPeriod reservationPeriod) {
+        if(repository.existsBySeat_IdAndReservationPeriod_reservationDay(reservation.seatId(),
                 reservation.date())){
-            List<Reservation> reservationList = repository.findBySeat_IdAndDate_reservationDay(reservation.seatId(),
+            List<Reservation> reservationList = repository.findBySeat_IdAndReservationPeriod_reservationDay(reservation.seatId(),
                     reservation.date());
-            reservationList.forEach(r -> verifyDate(r, reservation, date));
+            reservationList.forEach(r -> verifyDate(r, reservation, reservationPeriod));
 
         }
 
     }
 
-    private void verifyDate(Reservation r, ReservationRequest reservation, Date date) {
+    private void verifyDate(Reservation r, ReservationRequest reservation, ReservationPeriod reservationPeriod) {
         if (!
-                date.getStartTimeLocation().isAfter(r.getDate().getEndTimeLocation()) ||
-                date.getEndTimeLocation().isBefore(r.getDate().getStartTimeLocation())
+                reservationPeriod.getStartTimeLocation().isAfter(r.getReservationPeriod().getEndTimeLocation()) ||
+                reservationPeriod.getEndTimeLocation().isBefore(r.getReservationPeriod().getStartTimeLocation())
         ){
             throw new ConflictReservationException("Há um conflito de horário entre as reservas");
         }
     }
 
-    private Reservation getReservation(ReservationRequest reservation, Date date) {
+    private Reservation getReservation(ReservationRequest reservation, ReservationPeriod reservationPeriod) {
         Reservation reservationToSave = new Reservation();
         verifySeat(reservation);
         reservationToSave.setSeat(seatRepository.findById(reservation.seatId()).get());
         verifyEmployee(reservation);
         reservationToSave.setEmployees(employeeRepository.getReferenceById(reservation.employeId()));
-        reservationToSave.setDate(date);
+        reservationToSave.setReservationPeriod(reservationPeriod);
         return reservationToSave;
     }
 

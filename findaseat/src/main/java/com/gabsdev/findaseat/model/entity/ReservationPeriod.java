@@ -10,7 +10,7 @@ import java.time.LocalTime;
 @Embeddable
 @Data
 @Builder
-public class Date {
+public class ReservationPeriod {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate reservationDay;
@@ -19,10 +19,10 @@ public class Date {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTimeLocation;
 
-    public Date() {
+    public ReservationPeriod() {
     }
 
-    public Date(LocalDate date, LocalTime startTimeLocation, LocalTime endTimeLocation) {
+    public ReservationPeriod(LocalDate date, LocalTime startTimeLocation, LocalTime endTimeLocation) {
         this.reservationDay = date;
         this.startTimeLocation = startTimeLocation;
         this.endTimeLocation = endTimeLocation;

@@ -38,7 +38,7 @@ public class User {
         this.employees = employee;
     }
 
-    public User(UUID id, String email, String password, List<String> roles, Employee employees) {
+    public User(UUID id, String email, String password, List<String> role, Employee employees) {
         this.id = id;
         this.email = email;
         this.password = password;

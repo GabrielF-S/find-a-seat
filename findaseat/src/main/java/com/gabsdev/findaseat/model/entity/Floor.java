@@ -22,7 +22,6 @@ public class Floor {
     @ManyToOne()
     @JoinColumn(name="tb_business_uuid")
     private Business business;
-    @Lob
     private String layout;
 
     public Floor() {
@@ -34,5 +33,14 @@ public class Floor {
         this.floorName = floorName;
         this.slug = slug;
         this.business = business;
+    }
+
+    public Floor(UUID id, String towerName, String floorName, String slug, Business business, String layout) {
+        this.id = id;
+        this.towerName = towerName;
+        this.floorName = floorName;
+        this.slug = slug;
+        this.business = business;
+        this.layout = layout;
     }
 }
