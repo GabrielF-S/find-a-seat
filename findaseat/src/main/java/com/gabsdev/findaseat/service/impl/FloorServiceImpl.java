@@ -9,6 +9,7 @@ import com.gabsdev.findaseat.exception.SeatNotFoundException;
 import com.gabsdev.findaseat.mapper.FloorMapper;
 import com.gabsdev.findaseat.model.entity.Business;
 import com.gabsdev.findaseat.model.entity.Floor;
+import com.gabsdev.findaseat.model.enums.BusinessType;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.repository.FloorsRepository;
 import com.gabsdev.findaseat.service.FloorService;
@@ -36,16 +37,35 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     public Floor creteFloor(FloorRequest request) {
-        verifyBusiness(request.businessId());
-        if (floorsRepository.existsByfloorNameAndBusinessUuidAndTowerName(request.floorNumber() + "° andar",request.businessId(), request.towerName())) {
-            throw new FloorAlredyExistException("Floor "+ request.floorNumber() +" Already exists");
+
+        Business business = businessRepository.findById(request.businessId())
+                .orElseThrow(() -> new BusinessNotFoundException("Business not found!"));
+
+        String stringType;
+
+        switch (business.getBusinessType()){
+            case TRAVEL -> stringType = "- onibus";
+            case BUSINESS -> stringType = "° andar";
+            case RESTAURANT -> stringType= "- salao";
+            default -> stringType= " " ;
+
         }
-        Business business = businessRepository.findById(request.businessId()).get();
-        Floor floors = mapper.toFloor(request);
+
+
+        verifyFloor(request, stringType);
+
+        Floor floors = mapper.toFloor(request, stringType);
 
         floors.setBusiness(business);
         floors.setSlug(slugify.slugify(business.getBusinessName()+" " + request.towerName() + " " + floors.getFloorName()));
         return floorsRepository.save(floors);
+    }
+
+    private void verifyFloor(FloorRequest request, String stringType) {
+
+        if (floorsRepository.existsByfloorNameAndBusinessUuidAndTowerName(request.floorNumber() + stringType, request.businessId(), request.towerName())) {
+            throw new FloorAlredyExistException("Floor "+ request.floorNumber() +" Already exists");
+        }
     }
 
     @Override

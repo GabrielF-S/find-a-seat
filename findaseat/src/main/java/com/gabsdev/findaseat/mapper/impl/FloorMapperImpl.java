@@ -12,9 +12,9 @@ public class FloorMapperImpl implements FloorMapper {
 
 
     @Override
-    public Floor toFloor(FloorRequest request) {
+    public Floor toFloor(FloorRequest request, String stringType) {
         return Floor.builder()
-                .floorName(request.floorNumber() + "° andar")
+                .floorName(request.floorNumber() + stringType)
                 .towerName(request.towerName())
                 .build();
     }
