@@ -7,6 +7,7 @@ import com.gabsdev.findaseat.dto.response.BusinessResponse;
 import com.gabsdev.findaseat.model.entity.Business;
 import com.gabsdev.findaseat.service.BusinessService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/business")
+@CrossOrigin("*")
 public class BusinessControllerImpl implements BusinessController {
 
     private final BusinessService service;
