@@ -2,6 +2,7 @@ package com.gabsdev.findaseat.service;
 
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
+import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface FloorService {
     void deleteById(UUID uuid);
 
     Floor insertLayout(UUID uuid, String layout);
+
+    LayoutResponse getLayoutByUuid(UUID uuid);
 }

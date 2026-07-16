@@ -2,6 +2,7 @@ package com.gabsdev.findaseat.service.impl;
 
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
+import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.exception.FloorAlredyExistException;
 import com.gabsdev.findaseat.exception.FloorNoFoundException;
@@ -96,12 +97,17 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     public Floor insertLayout(UUID uuid, String layout) {
-        if (!floorsRepository.existsById(uuid)){
-            throw new SeatNotFoundException("Seat not found");
-        }
-        Floor floor = floorsRepository.findById(uuid).get();
+        Floor floor = floorsRepository.findById(uuid)
+                .orElseThrow(() -> new FloorNoFoundException("Floor not found"));
         floor.setLayout(layout);
         return floorsRepository.save(floor);
+    }
+
+    @Override
+    public LayoutResponse getLayoutByUuid(UUID uuid) {
+        Floor floor = floorsRepository.findById(uuid).orElseThrow(() -> new FloorNoFoundException("Floor not found"));
+
+        return new LayoutResponse(floor.getLayout());
     }
 
     public void verifyById(UUID uuid) {
