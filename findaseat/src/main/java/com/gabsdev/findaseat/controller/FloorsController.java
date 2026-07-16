@@ -2,6 +2,7 @@ package com.gabsdev.findaseat.controller;
 
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
+import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
@@ -22,6 +23,9 @@ public interface FloorsController {
 
     @GetMapping(value = "/{businessUuid}/getAll")
     ResponseEntity<List<FloorResponse>> getAllFloors(@PathVariable UUID businessUuid);
+
+    @GetMapping(value = "/getLayout/{uuid}")
+    ResponseEntity<LayoutResponse> getLayoutByFloorUuid(@PathVariable UUID uuid);
 
 
     @PutMapping(value = "/update")

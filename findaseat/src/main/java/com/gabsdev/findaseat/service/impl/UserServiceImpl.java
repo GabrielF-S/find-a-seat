@@ -24,10 +24,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public RegisterUserResponse createUser(RegisterUserRequest userToRegister) {
         User user = mapper.toUser(userToRegister);
-        if (!employeeRepository.existsById(userToRegister.employeeID())){
-            throw  new EmployeeNotFoundException("Não foi possivel localizar um funcionario com este id");
-        }
-        Employee employee = employeeRepository.findById(userToRegister.employeeID()).get();
+              Employee employee = employeeRepository.findById(userToRegister.employeeID()).orElseThrow(
+                () ->  new EmployeeNotFoundException("Não foi possivel localizar um funcionario com este id"));
         user.setEmployees(employee);
         User saved = repository.save(user);
 

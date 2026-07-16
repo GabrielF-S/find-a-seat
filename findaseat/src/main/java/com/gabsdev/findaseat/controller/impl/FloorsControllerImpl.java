@@ -3,9 +3,11 @@ package com.gabsdev.findaseat.controller.impl;
 import com.gabsdev.findaseat.controller.FloorsController;
 import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
+import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
 import com.gabsdev.findaseat.service.FloorService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/floor")
+@CrossOrigin("*")
 public class FloorsControllerImpl implements FloorsController {
 
     private final FloorService service;
@@ -41,6 +44,11 @@ public class FloorsControllerImpl implements FloorsController {
     @Override
     public ResponseEntity<List<FloorResponse>> getAllFloors(UUID businessUuid) {
         return ResponseEntity.ok(service.getAll(businessUuid));
+    }
+
+    @Override
+    public ResponseEntity<LayoutResponse> getLayoutByFloorUuid(UUID uuid) {
+        return ResponseEntity.ok(service.getLayoutByUuid(uuid));
     }
 
     @Override
