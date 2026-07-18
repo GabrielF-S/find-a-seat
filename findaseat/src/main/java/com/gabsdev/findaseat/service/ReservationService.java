@@ -1,5 +1,6 @@
 package com.gabsdev.findaseat.service;
 
+import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
@@ -13,7 +14,7 @@ public interface ReservationService {
 
     ReservationResponse createReservation(ReservationRequest reservation, LocalTime start, LocalTime end);
 
-    ReservationResponse getReservation(UUID reservationId, String employeeName, LocalDate date);
+    List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date);
 
     ReservationResponse updateReservation(Reservation reservation);
 
@@ -24,4 +25,6 @@ public interface ReservationService {
     List<ReservationResponse> getByDay(LocalDate localDate);
 
     ReservationResponse close(UUID uuid);
+
+    ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime);
 }

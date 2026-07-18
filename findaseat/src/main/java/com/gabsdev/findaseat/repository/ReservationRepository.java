@@ -12,9 +12,9 @@ import java.util.UUID;
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
 
     @Query("SELECT r FROM Reservation r " +
-            "JOIN Employee e WHERE UPPER(e.employeeName) LIKE UPPER(:name)  " +
+            "INNER JOIN Employee e ON r.employees.id = e.id WHERE UPPER(e.employeeName) LIKE UPPER(:name)  " +
             "AND r.reservationPeriod.reservationDay =:date")
-    Reservation findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(@Param("name") String name, @Param("date") LocalDate date);
+    List<Reservation>findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(@Param("name") String name, @Param("date") LocalDate date);
 
     boolean existsBySeat_IdAndReservationPeriod_reservationDay(UUID seatId, LocalDate localDate);
 

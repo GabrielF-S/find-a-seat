@@ -1,6 +1,7 @@
 package com.gabsdev.findaseat.controller.impl;
 
 import com.gabsdev.findaseat.controller.ReservationController;
+import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
@@ -37,8 +38,15 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date) {
+    public ResponseEntity<ReservationResponse> quickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime) {
+        ReservationResponse reservationCreated = service.CreateQuickReservation(reservation, startTime, endTime);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(reservationCreated.id()).toUri();
+        return ResponseEntity.created(uri).build();
+    }
 
+    @Override
+    public ResponseEntity<List<ReservationResponse>> getReservation(UUID reservationId, String employeeName, LocalDate date) {
         return  ResponseEntity.ok(service.getReservation(reservationId, employeeName, date));
     }
 

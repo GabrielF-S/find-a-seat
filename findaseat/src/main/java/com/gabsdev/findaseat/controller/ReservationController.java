@@ -1,5 +1,6 @@
 package com.gabsdev.findaseat.controller;
 
+import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
@@ -20,11 +21,19 @@ public interface ReservationController {
     ResponseEntity<ReservationResponse> makeReservation(
             @RequestBody ReservationRequest reservation,
             @RequestParam(name = "start", required = false) LocalTime startTime,
-            @RequestParam(name = "end", required = true)  LocalTime endTime
+            @RequestParam(name = "end", required = false)  LocalTime endTime
             );
 
+    @PostMapping(value = "quickReservatioin")
+    ResponseEntity<ReservationResponse> quickReservation(
+            @RequestBody QuickReservationRequest reservation,
+            @RequestParam(name = "start", required = false) LocalTime startTime,
+            @RequestParam(name = "end", required = false) LocalTime endTime
+
+    );
+
     @GetMapping(value = "/getReservation")
-    ResponseEntity<ReservationResponse> getReservation(
+    ResponseEntity<List<ReservationResponse>> getReservation(
             @RequestParam(value = "id", required = false) UUID reservationId,
             @RequestParam(value = "name", required = false, defaultValue = "") String employeeName,
             @RequestParam(value ="dia", required = false)LocalDate date

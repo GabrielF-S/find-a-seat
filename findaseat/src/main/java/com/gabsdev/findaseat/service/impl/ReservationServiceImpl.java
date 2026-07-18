@@ -1,11 +1,14 @@
 package com.gabsdev.findaseat.service.impl;
 
+import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.exception.*;
 import com.gabsdev.findaseat.mapper.ReservationMapper;
+import com.gabsdev.findaseat.model.entity.Employee;
 import com.gabsdev.findaseat.model.entity.ReservationPeriod;
 import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.entity.Seat;
 import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.repository.ReservationRepository;
@@ -15,8 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -38,7 +43,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponse createReservation(ReservationRequest reservation, LocalTime start, LocalTime end) {
         verifyEmployeeAbleToReserve(reservation);
-        ReservationPeriod reservationPeriod = difineDate(reservation, start, end);
+        Type type = verifySeatType(reservation.seatId());
+        ReservationPeriod reservationPeriod = defineDate(type, reservation.date(), start, end);
         verifyReservationDate(reservation, reservationPeriod);
         Reservation reservationToSave = getReservation(reservation, reservationPeriod);
         Reservation saved = repository.save(reservationToSave);
@@ -46,13 +52,37 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
-    private ReservationPeriod difineDate(ReservationRequest reservation, LocalTime start, LocalTime end) {
-        Type type = verifySeatType(reservation.seatId());
-        if (type.name().equals("desk")){
+    @Override
+    public ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime) {
+        verifyEmployeeAbleToReserve(reservation.employeId(), reservation.type());
+        ReservationPeriod reservationPeriod = defineDate(reservation.type(), reservation.date(), startTime, endTime);
+        
+        List<Seat> seatList = seatRepository.findByType(reservation.type());
+        List<Seat> seats = seatList.stream()
+                .filter(seat ->
+                        !repository.existsBySeat_IdAndReservationPeriod_reservationDay(
+                                seat.getId(), reservationPeriod.getReservationDay())
+                ).toList();
+
+        Seat seat = seats.get(0);
+        Employee employee = employeeRepository.findById(reservation.employeId()).get();
+
+        Reservation quickReservation = Reservation.builder()
+                .employees(employee)
+                .reservationPeriod(reservationPeriod)
+                .seat(seat)
+                .build();
+
+        Reservation saved = repository.save(quickReservation);
+        return mapper.toReservationResponse(saved);
+    }
+
+    private ReservationPeriod defineDate(Type type, LocalDate date, LocalTime start, LocalTime end) {
+        if (type.name().equalsIgnoreCase("desk")){
             start = LocalTime.parse("08:00");
             end = LocalTime.parse("18:00");
         }
-        return new ReservationPeriod(reservation.date(),start,end);
+        return new ReservationPeriod(date,start,end);
     }
 
     private Type verifySeatType(UUID uuid) {
@@ -63,10 +93,14 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
-    private void verifyEmployeeAbleToReserve(ReservationRequest reservation) {
+    private void   verifyEmployeeAbleToReserve(ReservationRequest reservation) {
         Type type = seatRepository.findById(reservation.seatId()).get().getType();
-        if (repository.existsByEmployees_idAndActiveTrue(reservation.employeId())){
-          List<Reservation> reservationList =  repository.findByEmployees_idAndActiveTrue(reservation.employeId());
+        verifyEmployeeAbleToReserve(reservation.employeId(), type);
+    }
+
+    private void verifyEmployeeAbleToReserve(Long employeId , Type type) {
+        if (repository.existsByEmployees_idAndActiveTrue(employeId)){
+          List<Reservation> reservationList =  repository.findByEmployees_idAndActiveTrue(employeId);
             if (reservationList.stream().anyMatch(reservation1 -> reservation1.getSeat().getType() == type)) {
                 throw new ReservationConflictException("Já possui uma reserva de "
                         + type.name() +
@@ -74,19 +108,22 @@ public class ReservationServiceImpl implements ReservationService {
             }
 
         }
-
     }
 
+
     @Override
-    public ReservationResponse getReservation(UUID reservationId, String employeeName, LocalDate date) {
+    public List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date) {
+        List<ReservationResponse> responseList = new ArrayList<>();
         if (reservationId != null){
-           return findById(reservationId);
+           responseList.add(findById(reservationId)) ;
+           return responseList;
         }
         if (date== null){
             date = LocalDate.now();
         }
-       Reservation reservation =  repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay("%"+employeeName+"%", date);
-        return mapper.toReservationResponse(reservation);
+       List<Reservation> reservations =  repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay("%"+employeeName+"%", date);
+        responseList = reservations.stream().map(mapper::toReservationResponse).toList();
+        return responseList;
     }
 
     @Override
