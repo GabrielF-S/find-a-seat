@@ -1,0 +1,1 @@
+ALTER TABLE tb_employees DROP COLUMN type;

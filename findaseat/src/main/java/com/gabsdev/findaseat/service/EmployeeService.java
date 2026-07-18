@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EmployeeService {
-    EmployeeResponse createEmployee(EmployeeRequest employeeRequest);
+    EmployeeResponse createEmployee(EmployeeRequest employeeRequest, UUID businessUuid);
 
     List<EmployeeResponse> getEmployees(String name);
 

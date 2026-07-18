@@ -23,13 +23,19 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(Long id, String employeeName, String department, String document, Business business) {
-        this.id = id;
+    public Employee( String employeeName, String department, String document, Business business) {
+       
         this.employeeName = employeeName;
         this.business = business;
         this.department = department;
         this.document = document;
     }
 
-
+    public Employee(Long id, String employeeName, String department, String document, Business business) {
+        this.id = id;
+        this.employeeName = employeeName;
+        this.department = department;
+        this.document = document;
+        this.business = business;
+    }
 }

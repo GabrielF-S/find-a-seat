@@ -6,6 +6,7 @@ import com.gabsdev.findaseat.dto.response.EmployeeResponse;
 import com.gabsdev.findaseat.model.entity.Employee;
 import com.gabsdev.findaseat.service.EmployeeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 @RestController
 @RequestMapping("api/employees")
+@CrossOrigin("*")
 public class EmployeeControllerImpl implements EmployeeController {
 
     private final EmployeeService service;
@@ -24,8 +26,8 @@ public class EmployeeControllerImpl implements EmployeeController {
     }
 
     @Override
-    public ResponseEntity<EmployeeResponse> registerEmployee( EmployeeRequest employeeRequest) {
-        EmployeeResponse response = service.createEmployee(employeeRequest);
+    public ResponseEntity<EmployeeResponse> registerEmployee( EmployeeRequest employeeRequest, UUID businessuuid) {
+        EmployeeResponse response = service.createEmployee(employeeRequest, businessuuid);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(response.id()).toUri();

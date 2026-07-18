@@ -14,8 +14,9 @@ import java.util.UUID;
 @OpenAPIDefinition(servers = {@Server(url = "/", description = "Default server URL")})
 public interface EmployeeController {
 
-    @PostMapping()
-    ResponseEntity<EmployeeResponse> registerEmployee(@RequestBody EmployeeRequest employeeRequest);
+    @PostMapping(value = "/{businessUuid}")
+    ResponseEntity<EmployeeResponse> registerEmployee(@RequestBody EmployeeRequest employeeRequest,
+                                                      @PathVariable(value = "businessUuid") UUID businessUuid);
 
     @GetMapping(value = "/getEmployeeByName")
     ResponseEntity<List<EmployeeResponse>> getEmployesByName(

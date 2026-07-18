@@ -31,18 +31,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
-        Business business = getBusiness(employeeRequest);
+    public EmployeeResponse createEmployee(EmployeeRequest employeeRequest, UUID businessUuid) {
+        Business business = getBusiness(businessUuid);
         Employee employeeToSave = mapper.toEmployee(employeeRequest, business);
         Employee saved = repository.save(employeeToSave);
         return mapper.toEmployeeResponse(saved);
     }
 
-    private Business getBusiness(EmployeeRequest employeeRequest) {
-        return businessRepository.findById(employeeRequest.businessId())
+    private Business getBusiness(UUID uuid) {
+        return businessRepository.findById(uuid)
                 .orElseThrow(
                         () -> new BusinessNotFoundException("Business" +
-                                employeeRequest.businessId() + " Not Found"));
+                                uuid + " Not Found"));
     }
 
     @Override

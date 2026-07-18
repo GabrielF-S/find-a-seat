@@ -4,6 +4,5 @@ import java.util.UUID;
 
 public record EmployeeRequest(String employeeName,
                               String department,
-                              String document,
-                              UUID businessId) {
+                              String document) {
 }
