@@ -38,25 +38,17 @@ public class FloorServiceImpl implements FloorService {
 
     @Override
     public Floor creteFloor(FloorRequest request) {
-
         Business business = businessRepository.findById(request.businessId())
                 .orElseThrow(() -> new BusinessNotFoundException("Business not found!"));
-
         String stringType;
-
         switch (business.getBusinessType()){
             case TRAVEL -> stringType = "- onibus";
             case BUSINESS -> stringType = "° andar";
             case RESTAURANT -> stringType= "- salao";
             default -> stringType= " " ;
-
         }
-
-
         verifyFloor(request, stringType);
-
         Floor floors = mapper.toFloor(request, stringType);
-
         floors.setBusiness(business);
         floors.setSlug(slugify.slugify(business.getBusinessName()+" " + request.towerName() + " " + floors.getFloorName()));
         return floorsRepository.save(floors);
@@ -92,7 +84,6 @@ public class FloorServiceImpl implements FloorService {
     public void deleteById(UUID uuid) {
         verifyById(uuid);
         floorsRepository.deleteById(uuid);
-
     }
 
     @Override
@@ -106,7 +97,6 @@ public class FloorServiceImpl implements FloorService {
     @Override
     public LayoutResponse getLayoutByUuid(UUID uuid) {
         Floor floor = floorsRepository.findById(uuid).orElseThrow(() -> new FloorNoFoundException("Floor not found"));
-
         return new LayoutResponse(floor.getLayout());
     }
 

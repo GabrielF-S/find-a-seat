@@ -106,7 +106,6 @@ public class ReservationServiceImpl implements ReservationService {
                         + type.name() +
                         " Ativa, finalize ela para poder realizar uma nova reserva");
             }
-
         }
     }
 
@@ -177,9 +176,7 @@ public class ReservationServiceImpl implements ReservationService {
             List<Reservation> reservationList = repository.findBySeat_IdAndReservationPeriod_reservationDay(reservation.seatId(),
                     reservation.date());
             reservationList.forEach(r -> verifyDate(r, reservation, reservationPeriod));
-
         }
-
     }
 
     private void verifyDate(Reservation r, ReservationRequest reservation, ReservationPeriod reservationPeriod) {

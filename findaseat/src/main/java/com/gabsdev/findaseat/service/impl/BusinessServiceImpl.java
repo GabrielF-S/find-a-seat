@@ -64,6 +64,5 @@ public class BusinessServiceImpl implements BusinessService {
             throw new BusinessNotFoundException("Business Not Found");
         }
         repository.deleteById(uuid);
-
     }
 }
