@@ -9,6 +9,7 @@ import com.gabsdev.findaseat.model.entity.Employee;
 import com.gabsdev.findaseat.model.entity.ReservationPeriod;
 import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.model.entity.Seat;
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.repository.ReservationRepository;
@@ -56,7 +57,6 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime) {
         verifyEmployeeAbleToReserve(reservation.employeId(), reservation.type());
         ReservationPeriod reservationPeriod = defineDate(reservation.type(), reservation.date(), startTime, endTime);
-        
         List<Seat> seatList = seatRepository.findByType(reservation.type());
         List<Seat> seats = seatList.stream()
                 .filter(seat ->
@@ -66,15 +66,24 @@ public class ReservationServiceImpl implements ReservationService {
 
         Seat seat = seats.get(0);
         Employee employee = employeeRepository.findById(reservation.employeId()).get();
-
         Reservation quickReservation = Reservation.builder()
                 .employees(employee)
                 .reservationPeriod(reservationPeriod)
                 .seat(seat)
                 .build();
-
         Reservation saved = repository.save(quickReservation);
         return mapper.toReservationResponse(saved);
+    }
+
+    @Override
+    public ReservationResponse confirmReservation(UUID uuid, ReservationStatus reservationStatus) {
+        Reservation reservation = repository.findById(uuid).orElseThrow(() -> new ReservationNotFoundException("Reservation Not found"));
+        if (reservation.getStatus().name().equalsIgnoreCase(reservationStatus.name())){
+            throw new ConflictReservationException("Reserva já esta " + reservationStatus.name());
+        }
+        reservation.setStatus(reservationStatus);
+        reservation.setActive(true);
+        return mapper.toReservationResponse(repository.save(reservation));
     }
 
     private ReservationPeriod defineDate(Type type, LocalDate date, LocalTime start, LocalTime end) {
@@ -159,9 +168,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse close(UUID uuid) {
+    public ReservationResponse close(UUID uuid, boolean isCancelled) {
         Reservation reservation = repository.findById(uuid).get();
         reservation.getReservationPeriod().setEndTimeLocation(LocalTime.now());
+        reservation.setActive(false);
+        if (isCancelled){
+            reservation.setStatus(ReservationStatus.CANCELLED);
+        }
         return mapper.toReservationResponse(repository.save(reservation));
     }
 

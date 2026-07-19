@@ -4,6 +4,7 @@ import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,7 +25,9 @@ public interface ReservationService {
 
     List<ReservationResponse> getByDay(LocalDate localDate);
 
-    ReservationResponse close(UUID uuid);
+    ReservationResponse close(UUID uuid, boolean isCancelled);
 
     ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime);
+
+    ReservationResponse confirmReservation(UUID uuid, ReservationStatus reservationStatus);
 }

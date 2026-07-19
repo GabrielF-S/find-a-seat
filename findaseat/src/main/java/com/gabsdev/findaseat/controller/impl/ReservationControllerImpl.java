@@ -5,6 +5,7 @@ import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.service.ReservationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,13 +62,19 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
+    public ResponseEntity<ReservationResponse> confirmaReservation(UUID uuid, ReservationStatus reservationStatus) {
+
+        return ResponseEntity.ok(service.confirmReservation(uuid, reservationStatus));
+    }
+
+    @Override
     public ResponseEntity<ReservationResponse> updateReservation(Reservation reservation) {
         return ResponseEntity.ok(service.updateReservation(reservation));
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> closeReservation(UUID uuid) {
-        return ResponseEntity.ok(service.close(uuid));
+    public ResponseEntity<ReservationResponse> closeReservation(UUID uuid, boolean isCancelled) {
+        return ResponseEntity.ok(service.close(uuid, isCancelled));
     }
 
     @Override

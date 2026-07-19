@@ -1,5 +1,6 @@
 package com.gabsdev.findaseat.model.entity;
 
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -25,18 +26,16 @@ public class Reservation {
     private Employee employees;
 
     private boolean active;
+    private ReservationStatus status;
 
-
-
-    public Reservation() {
-
-    }
+    public Reservation() {    }
 
     public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees) {
         this.id = id;
         this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
+        this.status = ReservationStatus.PENDING;
     }
 
     public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active) {
@@ -45,11 +44,6 @@ public class Reservation {
         this.seat = seat;
         this.employees = employees;
         this.active = active;
+        this.status = ReservationStatus.PENDING;
     }
-
-    public boolean isActive() {
-        return getReservationPeriod().getEndTimeLocation().isAfter(LocalTime.now());
-    }
-
-
 }

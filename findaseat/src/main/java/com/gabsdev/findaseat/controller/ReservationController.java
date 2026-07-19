@@ -4,6 +4,7 @@ import com.gabsdev.findaseat.dto.request.QuickReservationRequest;
 import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.http.ResponseEntity;
@@ -48,11 +49,14 @@ public interface ReservationController {
     @GetMapping("/byDay")
     ResponseEntity<List<ReservationResponse>> getReservationByDay(@RequestParam(value = "day") LocalDate localDate);
 
+    @PatchMapping(value = "/confirmReservation/{uuid}")
+    ResponseEntity<ReservationResponse> confirmaReservation(@PathVariable(value = "uuid") UUID uuid, @RequestBody ReservationStatus reservationStatus);
+
     @PutMapping(value = "/update")
     ResponseEntity<ReservationResponse> updateReservation(@RequestBody Reservation reservation);
 
-    @PatchMapping("/closeReservation")
-    ResponseEntity<ReservationResponse> closeReservation( @PathVariable UUID uuid);
+    @PatchMapping("/closeReservation/{uuid}/")
+    ResponseEntity<ReservationResponse> closeReservation( @PathVariable(value = "uuid") UUID uuid, @RequestParam(name = "cancelled", required = true) boolean isCancelled );
 
     @DeleteMapping( value = "/delete/{uuid}")
     ResponseEntity<Void> deleteReservation(@PathVariable UUID uuid);
