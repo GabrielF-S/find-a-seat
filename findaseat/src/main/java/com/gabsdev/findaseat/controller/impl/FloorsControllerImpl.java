@@ -32,7 +32,6 @@ public class FloorsControllerImpl implements FloorsController {
     public ResponseEntity<Floor> createFloor(FloorRequest request) {
         Floor creted = service.creteFloor(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(creted.getId()).toUri();
-
         return ResponseEntity.created(uri).build();
     }
 
