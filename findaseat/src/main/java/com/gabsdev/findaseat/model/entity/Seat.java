@@ -59,6 +59,7 @@ public class Seat {
 
     public Seat(String name, String nick, boolean exclusive) {
         this.seatName = name;
+        this.nick = nick;
         this.exclusive = exclusive;
         this.status = Status.AVALIABLE;
 

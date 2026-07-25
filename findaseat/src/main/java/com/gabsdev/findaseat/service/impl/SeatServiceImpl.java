@@ -67,7 +67,6 @@ public class SeatServiceImpl implements SeatService {
                 (seatRequest.type().name().equalsIgnoreCase("room") ||
                 seatRequest.type().name().equalsIgnoreCase("table"))) {
             throw new NumberOfSeatsException("Is required define a number of seats bigger that 1 for a " + seatRequest.type().name());
-
         }
     }
 
@@ -92,12 +91,10 @@ public class SeatServiceImpl implements SeatService {
             localDate = LocalDate.now();
         }
         if(reservationRepository.existsBySeat_IdAndReservationPeriod_reservationDay(seat.getId(), localDate)){
-
             List<Reservation> bySeatIdAndDateReservationDay = reservationRepository.findBySeat_IdAndReservationPeriod_reservationDay(seat.getId(), localDate);
             if (bySeatIdAndDateReservationDay.stream().anyMatch(Reservation::isActive)) {
                 seat.setStatus(Status.RESERVED);
             }
-
         }
         return seat;
     }
@@ -148,6 +145,5 @@ public class SeatServiceImpl implements SeatService {
             throw new SeatAlredyExistException("Seat already exist");
         }
     }
-
 
 }

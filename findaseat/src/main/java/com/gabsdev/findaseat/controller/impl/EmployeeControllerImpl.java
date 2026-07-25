@@ -28,7 +28,6 @@ public class EmployeeControllerImpl implements EmployeeController {
     @Override
     public ResponseEntity<EmployeeResponse> registerEmployee( EmployeeRequest employeeRequest, UUID businessuuid) {
         EmployeeResponse response = service.createEmployee(employeeRequest, businessuuid);
-
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).build();
@@ -47,12 +46,12 @@ public class EmployeeControllerImpl implements EmployeeController {
 
     @Override
     public ResponseEntity<List<EmployeeResponse>> getAllEmployess(UUID businessId) {
+        //TODO criar metodo para buscar todos os Employees por Business Uuid
         return null;
     }
 
     @Override
     public ResponseEntity<Employee> updateEmployee(Employee employee) {
-
         return ResponseEntity.ok(service.updateEmployee(employee));
     }
 

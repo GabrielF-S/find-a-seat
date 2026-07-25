@@ -1,5 +1,6 @@
 package com.gabsdev.findaseat.model.entity;
 
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -23,33 +24,26 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "tb_employees_id")
     private Employee employees;
-
     private boolean active;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
 
-
-
-    public Reservation() {
-
-    }
+    public Reservation() {    }
 
     public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees) {
         this.id = id;
         this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
+
     }
 
-    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active) {
+    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active, ReservationStatus status) {
         this.id = id;
         this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
         this.active = active;
+        this.reservationStatus = status;
     }
-
-    public boolean isActive() {
-        return getReservationPeriod().getEndTimeLocation().isAfter(LocalTime.now());
-    }
-
-
 }

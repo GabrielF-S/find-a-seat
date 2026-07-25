@@ -61,7 +61,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = repository.findById(employeeId).orElseThrow(
                 () -> new EmployeeNotFoundException("Não foi possivel localizar um funcionario com este id")
         );
-
         return mapper.toEmployeeResponse(employee);
     }
 
@@ -79,7 +78,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private void verifyBusinessByUuid(UUID businessUuid) {
-
         if (!businessRepository.existsById(businessUuid)){
             throw new  BusinessNotFoundException("Business" +
                     businessUuid + " Not Found");
