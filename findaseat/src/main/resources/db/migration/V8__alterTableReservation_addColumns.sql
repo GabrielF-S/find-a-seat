@@ -1,2 +1,2 @@
 ALTER TABLE tb_reservation
- ADD reservationStatus VARCHAR(30)
+ ADD reservation_status VARCHAR(30)

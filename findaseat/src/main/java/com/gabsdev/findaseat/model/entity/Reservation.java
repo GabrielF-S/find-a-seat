@@ -24,9 +24,9 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "tb_employees_id")
     private Employee employees;
-
     private boolean active;
-    private ReservationStatus status;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
 
     public Reservation() {    }
 
@@ -35,15 +35,15 @@ public class Reservation {
         this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
-        this.status = ReservationStatus.PENDING;
+
     }
 
-    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active) {
+    public Reservation(UUID id, ReservationPeriod reservationPeriod, Seat seat, Employee employees, boolean active, ReservationStatus status) {
         this.id = id;
         this.reservationPeriod = reservationPeriod;
         this.seat = seat;
         this.employees = employees;
         this.active = active;
-        this.status = ReservationStatus.PENDING;
+        this.reservationStatus = status;
     }
 }
