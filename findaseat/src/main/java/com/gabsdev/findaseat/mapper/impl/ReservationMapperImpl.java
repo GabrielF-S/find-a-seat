@@ -10,6 +10,14 @@ public class ReservationMapperImpl implements ReservationMapper {
     @Override
     public ReservationResponse toReservationResponse(Reservation reservation) {
 
-        return new ReservationResponse(reservation.getId(),reservation.getSeat().getSeatName(),reservation.getEmployees().getEmployeeName(), reservation.getReservationPeriod(), reservation.isActive());
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getSeat().getSeatName(),
+                reservation.getEmployees().getEmployeeName(),
+                reservation.getReservationPeriod(),
+                reservation.isActive(),
+                reservation.getReservationStatus()
+
+        );
     }
 }
