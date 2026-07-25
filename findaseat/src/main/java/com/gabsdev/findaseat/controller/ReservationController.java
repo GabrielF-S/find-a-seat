@@ -49,11 +49,14 @@ public interface ReservationController {
     @GetMapping("/byDay")
     ResponseEntity<List<ReservationResponse>> getReservationByDay(@RequestParam(value = "day") LocalDate localDate);
 
-    @PatchMapping(value = "/confirmReservation/{uuid}")
-    ResponseEntity<ReservationResponse> confirmaReservation(@PathVariable(value = "uuid") UUID uuid, @RequestBody ReservationStatus reservationStatus);
+    @PatchMapping(value = "/updateReservationStatus/{uuid}")
+    ResponseEntity<ReservationResponse> updateReservationStatus(@PathVariable(value = "uuid") UUID uuid, @RequestBody ReservationStatus reservationStatus);
 
     @PutMapping(value = "/update")
     ResponseEntity<ReservationResponse> updateReservation(@RequestBody Reservation reservation);
+
+    @PatchMapping(value = "/confirmReservation/{uuid}")
+    ResponseEntity<ReservationResponse> confirmReservation(@PathVariable(value = "uuid") UUID uuid);
 
     @PatchMapping("/closeReservation/{uuid}/")
     ResponseEntity<ReservationResponse> closeReservation( @PathVariable(value = "uuid") UUID uuid, @RequestParam(name = "cancelled", required = true) boolean isCancelled );

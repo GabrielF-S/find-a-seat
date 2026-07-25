@@ -62,14 +62,19 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> confirmaReservation(UUID uuid, ReservationStatus reservationStatus) {
+    public ResponseEntity<ReservationResponse> updateReservationStatus(UUID uuid, ReservationStatus reservationStatus) {
 
-        return ResponseEntity.ok(service.confirmReservation(uuid, reservationStatus));
+        return ResponseEntity.ok(service.updateReservation(uuid, reservationStatus));
     }
 
     @Override
     public ResponseEntity<ReservationResponse> updateReservation(Reservation reservation) {
         return ResponseEntity.ok(service.updateReservation(reservation));
+    }
+
+    @Override
+    public ResponseEntity<ReservationResponse> confirmReservation(UUID uuid) {
+        return ResponseEntity.ok(service.confirmReservation(uuid));
     }
 
     @Override

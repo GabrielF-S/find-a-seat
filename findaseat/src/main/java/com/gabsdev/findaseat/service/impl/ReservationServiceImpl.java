@@ -5,16 +5,15 @@ import com.gabsdev.findaseat.dto.request.ReservationRequest;
 import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.exception.*;
 import com.gabsdev.findaseat.mapper.ReservationMapper;
-import com.gabsdev.findaseat.model.entity.Employee;
-import com.gabsdev.findaseat.model.entity.ReservationPeriod;
-import com.gabsdev.findaseat.model.entity.Reservation;
-import com.gabsdev.findaseat.model.entity.Seat;
+import com.gabsdev.findaseat.model.entity.*;
 import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.repository.ReservationRepository;
 import com.gabsdev.findaseat.repository.SeatRepository;
+import com.gabsdev.findaseat.repository.UserRepository;
 import com.gabsdev.findaseat.service.ReservationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,8 +21,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ReservationServiceImpl implements ReservationService {
 
@@ -32,12 +31,14 @@ public class ReservationServiceImpl implements ReservationService {
     private final SeatRepository seatRepository;
     private final EmployeeRepository employeeRepository;
     private final ReservationMapper mapper;
+    private final UserRepository userRepository;
 
-    public ReservationServiceImpl(ReservationRepository repository, SeatRepository seatRepository, EmployeeRepository employeeRepository, ReservationMapper mapper) {
+    public ReservationServiceImpl(ReservationRepository repository, SeatRepository seatRepository, EmployeeRepository employeeRepository, ReservationMapper mapper, UserRepository userRepository) {
         this.repository = repository;
         this.seatRepository = seatRepository;
         this.employeeRepository = employeeRepository;
         this.mapper = mapper;
+        this.userRepository = userRepository;
     }
 
 
@@ -48,6 +49,8 @@ public class ReservationServiceImpl implements ReservationService {
         ReservationPeriod reservationPeriod = defineDate(type, reservation.date(), start, end);
         verifyReservationDate(reservation, reservationPeriod);
         Reservation reservationToSave = getReservation(reservation, reservationPeriod);
+        reservationToSave.setActive(true);
+        reservationToSave.setReservationStatus(ReservationStatus.PENDING);
         Reservation saved = repository.save(reservationToSave);
         return mapper.toReservationResponse(saved);
 
@@ -64,24 +67,26 @@ public class ReservationServiceImpl implements ReservationService {
                                 seat.getId(), reservationPeriod.getReservationDay())
                 ).toList();
 
-        Seat seat = seats.get(0);
+        Seat seat = seats.getFirst();
         Employee employee = employeeRepository.findById(reservation.employeId()).get();
         Reservation quickReservation = Reservation.builder()
                 .employees(employee)
                 .reservationPeriod(reservationPeriod)
                 .seat(seat)
+                .active(true)
+                .reservationStatus(ReservationStatus.PENDING)
                 .build();
         Reservation saved = repository.save(quickReservation);
         return mapper.toReservationResponse(saved);
     }
 
     @Override
-    public ReservationResponse confirmReservation(UUID uuid, ReservationStatus reservationStatus) {
+    public ReservationResponse updateReservation(UUID uuid, ReservationStatus reservationStatus) {
         Reservation reservation = repository.findById(uuid).orElseThrow(() -> new ReservationNotFoundException("Reservation Not found"));
-        if (reservation.getStatus().name().equalsIgnoreCase(reservationStatus.name())){
+        if (reservation.getReservationStatus().name().equalsIgnoreCase(reservationStatus.name())){
             throw new ConflictReservationException("Reserva já esta " + reservationStatus.name());
         }
-        reservation.setStatus(reservationStatus);
+        reservation.setReservationStatus(reservationStatus);
         reservation.setActive(true);
         return mapper.toReservationResponse(repository.save(reservation));
     }
@@ -173,9 +178,79 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.getReservationPeriod().setEndTimeLocation(LocalTime.now());
         reservation.setActive(false);
         if (isCancelled){
-            reservation.setStatus(ReservationStatus.CANCELLED);
+            reservation.setReservationStatus(ReservationStatus.CANCELLED);
         }
         return mapper.toReservationResponse(repository.save(reservation));
+    }
+
+    @Override
+    public List<Reservation> verifyUnconfirmedReservations(){
+        return repository.findByActiveTrueAndReservationStatus(ReservationStatus.PENDING);
+    }
+
+    @Override
+    public void sendNotificationReservation(Reservation reservation) {
+        User byEmployeeId = userRepository
+                .findByEmployees_Id(reservation.getEmployees().getId())
+                .orElse(new User(
+                        "email@teste.com", "12345", List.of("USER"), reservation.getEmployees()
+                ));
+        if (reservation.getReservationPeriod().getStartTimeLocation().isBefore(LocalTime.now())){
+            sendCancellEmail(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(), reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
+        }else {
+        sendEmailToConfirm(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(), reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
+        }
+    }
+
+    private void sendCancellEmail(String email, String employeeName, String nick, LocalDate reservationDay) {
+         /*
+        Metodo ficticio para chamar serviço de envio de e-mail para informar que a reserva foi cancelada
+         */
+        log.info("""
+                To: %s
+                
+                Hello, %s
+                This e-mail has send because you are  not confirmed, then your reservation has cancelled
+                Seat: %s
+                Date: %s
+                """.formatted(email, employeeName, nick, reservationDay));
+
+    }
+
+    @Override
+    public void verifyInactivedReservations() {
+        List<Reservation> reservationList = repository.findByActiveTrueAndReservationStatus(ReservationStatus.PENDING);
+        reservationList.forEach(r ->{
+            if (r.getReservationPeriod().getStartTimeLocation().isBefore(LocalTime.now())){
+                r.setActive(false);
+                r.setReservationStatus(ReservationStatus.NOT_CONFIRMED);
+                repository.save(r);
+            }
+        });
+    }
+
+    @Override
+    public ReservationResponse confirmReservation(UUID uuid) {
+        Reservation reservation = repository.findById(uuid).orElseThrow(
+                () -> new ReservationNotFoundException("Reservation Not Found"));
+        reservation.setReservationStatus(ReservationStatus.CONFIRMED);
+        Reservation saved = repository.save(reservation);
+        return mapper.toReservationResponse(saved);
+    }
+
+    private void sendEmailToConfirm(String email, String name, String seatName, LocalDate date) {
+        /*
+        Metodo ficticio para chamar serviço de envio de e-mail para  usuario que ainda não confirmou a reserva
+         */
+        log.info("""
+                To: %s
+                
+                Hello, %s
+                This e-mail has send because you are a reservation still not confirmed, please, check the reservation for not have issues
+                Seat: %s
+                Date: %s
+                """.formatted(email, name, seatName, date));
+
     }
 
     private ReservationResponse findById(UUID reservationId) {

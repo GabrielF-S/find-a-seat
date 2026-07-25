@@ -29,5 +29,13 @@ public interface ReservationService {
 
     ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime);
 
-    ReservationResponse confirmReservation(UUID uuid, ReservationStatus reservationStatus);
+    ReservationResponse updateReservation(UUID uuid, ReservationStatus reservationStatus);
+
+    List<Reservation> verifyUnconfirmedReservations();
+
+    void sendNotificationReservation(Reservation reservation);
+
+    void verifyInactivedReservations();
+
+    ReservationResponse confirmReservation(UUID uuid);
 }

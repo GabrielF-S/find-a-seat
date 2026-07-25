@@ -1,6 +1,7 @@
 package com.gabsdev.findaseat.repository;
 
 import com.gabsdev.findaseat.model.entity.Reservation;
+import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     boolean existsByEmployees_idAndActiveTrue(Long aLong);
 
     List<Reservation> findByEmployees_idAndActiveTrue(Long aLong);
+
+    List<Reservation> findByActiveTrueAndReservationStatus(ReservationStatus reservationStatus);
 }
