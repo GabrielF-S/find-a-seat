@@ -17,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
             "AND r.reservationPeriod.reservationDay =:date")
     List<Reservation>findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(@Param("name") String name, @Param("date") LocalDate date);
 
-    boolean existsBySeat_IdAndReservationPeriod_reservationDay(UUID seatId, LocalDate localDate);
+    boolean existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(UUID seatId, LocalDate localDate);
 
     List<Reservation> findBySeat_IdAndReservationPeriod_reservationDay(UUID uuid, LocalDate reservationDay);
 
