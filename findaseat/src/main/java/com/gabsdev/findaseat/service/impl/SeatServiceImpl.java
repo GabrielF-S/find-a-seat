@@ -90,7 +90,7 @@ public class SeatServiceImpl implements SeatService {
         if (localDate == null){
             localDate = LocalDate.now();
         }
-        if(reservationRepository.existsBySeat_IdAndReservationPeriod_reservationDay(seat.getId(), localDate)){
+        if(reservationRepository.existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(seat.getId(), localDate)){
             List<Reservation> bySeatIdAndDateReservationDay = reservationRepository.findBySeat_IdAndReservationPeriod_reservationDay(seat.getId(), localDate);
             if (bySeatIdAndDateReservationDay.stream().anyMatch(Reservation::isActive)) {
                 seat.setStatus(Status.RESERVED);
