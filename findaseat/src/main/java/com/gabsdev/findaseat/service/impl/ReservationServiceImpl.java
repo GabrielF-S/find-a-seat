@@ -260,21 +260,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private void verifyReservationDate(ReservationRequest reservation, ReservationPeriod reservationPeriod) {
-        if (repository.existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(reservation.seatId(),
-                reservation.date())) {
-            List<Reservation> reservationList = repository.findBySeat_IdAndReservationPeriod_reservationDay(reservation.seatId(),
-                    reservation.date());
-            reservationList.forEach(r -> verifyDate(r, reservation, reservationPeriod));
-        }
-    }
-
-    private void verifyDate(Reservation r, ReservationRequest reservation, ReservationPeriod reservationPeriod) {
-        if (!
-                reservationPeriod.getStartTimeLocation().isAfter(r.getReservationPeriod().getEndTimeLocation()) ||
-                reservationPeriod.getEndTimeLocation().isBefore(r.getReservationPeriod().getStartTimeLocation())
-        ) {
+        if (repository.
+                existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrueAndReservationPeriod_StartTimeLocationLessThanAndReservationPeriod_EndTimeLocationGreaterThan(
+                        reservation.seatId(), reservationPeriod.getReservationDay(), reservationPeriod.getEndTimeLocation(),
+                        reservationPeriod.getStartTimeLocation())) {
             throw new ConflictReservationException("Há um conflito de horário entre as reservas");
         }
+
     }
 
     private Reservation getReservation(ReservationRequest reservation, ReservationPeriod reservationPeriod) {
