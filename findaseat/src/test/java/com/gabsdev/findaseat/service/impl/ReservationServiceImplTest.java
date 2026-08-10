@@ -50,7 +50,7 @@ class ReservationServiceImplTest {
 
     @Test
     void shouldCreateAReservation() {
-        //cenatio
+        //cenati
 
         //ação
 
