@@ -4,7 +4,8 @@ public enum ReservationStatus {
     PENDING(1L, "pending"),
     CONFIRMED(2L, "confirmed"),
     CANCELLED(3L, "cancelled"),
-    NOT_CONFIRMED(4L, "not_confirmed");
+    NOT_CONFIRMED(4L, "not_confirmed"),
+    FINISHED(5L, "finished" );
 
     ReservationStatus(Long id, String statusName) {
     }
