@@ -32,5 +32,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     List<Reservation> findByActiveTrueAndReservationStatus(ReservationStatus reservationStatus);
 
-    boolean existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrueAndReservationPeriod_StartTimeLocationLessThanAndReservationPeriod_EndTimeLocationGreaterThan(UUID uuid, LocalDate reservationDay, LocalTime endTimeLocation, LocalTime startTimeLocation);
+    boolean existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrueAndReservationPeriod_StartTimeLocationLessThanEqualAndReservationPeriod_EndTimeLocationGreaterThanEqual(UUID uuid, LocalDate reservationDay, LocalTime endTimeLocation, LocalTime startTimeLocation);
 }

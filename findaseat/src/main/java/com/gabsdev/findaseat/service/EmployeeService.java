@@ -18,4 +18,6 @@ public interface EmployeeService {
     Employee updateEmployee(Employee employee);
 
     void deleteById(Long id);
+
+    List<EmployeeResponse> getAllEmployees(UUID businessId);
 }

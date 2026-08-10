@@ -77,6 +77,11 @@ public class EmployeeServiceImpl implements EmployeeService {
          repository.deleteById(id);
     }
 
+    @Override
+    public List<EmployeeResponse> getAllEmployees(UUID businessId) {
+        return repository.findByBusiness_Uuid(businessId);
+    }
+
     private void verifyBusinessByUuid(UUID businessUuid) {
         if (!businessRepository.existsById(businessUuid)){
             throw new  BusinessNotFoundException("Business" +

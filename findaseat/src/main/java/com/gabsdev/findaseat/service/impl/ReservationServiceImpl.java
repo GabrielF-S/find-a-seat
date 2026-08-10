@@ -8,13 +8,11 @@ import com.gabsdev.findaseat.mapper.ReservationMapper;
 import com.gabsdev.findaseat.model.entity.*;
 import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.model.enums.Type;
-import com.gabsdev.findaseat.repository.EmployeeRepository;
-import com.gabsdev.findaseat.repository.ReservationRepository;
-import com.gabsdev.findaseat.repository.SeatRepository;
-import com.gabsdev.findaseat.repository.UserRepository;
+import com.gabsdev.findaseat.repository.*;
 import com.gabsdev.findaseat.service.ReservationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -33,22 +31,28 @@ public class ReservationServiceImpl implements ReservationService {
     private final EmployeeRepository employeeRepository;
     private final ReservationMapper mapper;
     private final UserRepository userRepository;
+    private final WaitlistRepository waitlistRepository;
 
-    public ReservationServiceImpl(ReservationRepository repository, SeatRepository seatRepository, EmployeeRepository employeeRepository, ReservationMapper mapper, UserRepository userRepository) {
+    public ReservationServiceImpl(ReservationRepository repository, SeatRepository seatRepository, EmployeeRepository employeeRepository, ReservationMapper mapper, UserRepository userRepository, WaitlistRepository waitlistRepository) {
         this.repository = repository;
         this.seatRepository = seatRepository;
         this.employeeRepository = employeeRepository;
         this.mapper = mapper;
         this.userRepository = userRepository;
+        this.waitlistRepository = waitlistRepository;
     }
 
 
+    @Transactional
     @Override
     public ReservationResponse createReservation(ReservationRequest reservation, LocalTime start, LocalTime end) {
-        UUID employeeBusinessUuid = employeeRepository.findBusinessUuid(reservation.employeId());
+        UUID employeeBusinessUuid = employeeRepository.findBusinessUuid(reservation.employeId()).orElseThrow(() -> new EmployeeNotFoundException("Usuario não localizado"));
         UUID seatBusinessUuid = seatRepository.getBusinessUuid(reservation.seatId());
         if (!employeeBusinessUuid.equals(seatBusinessUuid)) {
             throw new SeatNotFoundException("Seat not found");
+        }
+        if (reservation.date().isBefore(LocalDate.now())){
+            throw new ReservationPeriodDayException("Data de reserva não pode ser anterior a data atual " + LocalDate.now());
         }
         verifyEmployeeAbleToReserve(reservation);
         Type type = verifySeatType(reservation.seatId());
@@ -62,13 +66,22 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime) {
-        List<Seat> seatList = seatRepository.findByType(reservation.type());
+    public ReservationResponse CreateQuickReservation(QuickReservationRequest reservation,
+                                                      LocalTime startTime, LocalTime endTime) {
+        UUID employeeBusinessUuid = employeeRepository.findBusinessUuid(reservation.employeId()).orElseThrow(() -> new EmployeeNotFoundException("Usuario não localizado"));
+        List<Seat> seatList = seatRepository
+                .findByTypeAndFloor_Business_Uuid(reservation.type(), employeeBusinessUuid);
         List<Seat> seats = seatList.stream()
                 .filter(seat ->
                         !repository.existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(
                                 seat.getId(), reservation.date())
                 ).toList();
+        if(seats.isEmpty() && reservation.type().name().equalsIgnoreCase("table")){
+            Waitlist waitlist = new Waitlist(reservation.employeId(), reservation.date(), Duration.between(startTime, endTime), ReservationStatus.PENDING, employeeBusinessUuid);
+            Waitlist saved = waitlistRepository.save(waitlist);
+            throw new WaitlistException("Reserva adicionada a fila de espera ID: " + saved.getId(), saved.getId() );
+
+        }
         UUID id = seats.getFirst().getId();
         ReservationResponse response = createReservation(new ReservationRequest(reservation.date(), id, reservation.employeId()), startTime, endTime);
         return response;
@@ -196,9 +209,11 @@ public class ReservationServiceImpl implements ReservationService {
                         "email@teste.com", "12345", List.of("USER"), reservation.getEmployees()
                 ));
         if (reservation.getReservationPeriod().getStartTimeLocation().isBefore(LocalTime.now())) {
-            sendCancellEmail(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(), reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
+            sendCancellEmail(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(),
+                    reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
         } else {
-            sendEmailToConfirm(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(), reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
+            sendEmailToConfirm(byEmployeeId.getEmail(), reservation.getEmployees().getEmployeeName(),
+                    reservation.getSeat().getNick(), reservation.getReservationPeriod().getReservationDay());
         }
     }
 
@@ -210,7 +225,7 @@ public class ReservationServiceImpl implements ReservationService {
                 To: %s
                 
                 Hello, %s
-                This e-mail has send because you are  not confirmed, then your reservation has cancelled
+                This e-mail has send because you are not confirmed, then your reservation has cancelled
                 Seat: %s
                 Date: %s
                 """.formatted(email, employeeName, nick, reservationDay));
@@ -234,6 +249,9 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationResponse confirmReservation(UUID uuid) {
         Reservation reservation = repository.findById(uuid).orElseThrow(
                 () -> new ReservationNotFoundException("Reservation Not Found"));
+        if (!reservation.isActive()){
+            throw new ReservationDesativatedException("Reserva não pode ser confirmada pois passou do prazo para confirmação");
+        }
         reservation.setReservationStatus(ReservationStatus.CONFIRMED);
         Reservation saved = repository.save(reservation);
         return mapper.toReservationResponse(saved);
@@ -261,7 +279,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     private void verifyReservationDate(ReservationRequest reservation, ReservationPeriod reservationPeriod) {
         if (repository.
-                existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrueAndReservationPeriod_StartTimeLocationLessThanAndReservationPeriod_EndTimeLocationGreaterThan(
+                existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrueAndReservationPeriod_StartTimeLocationLessThanEqualAndReservationPeriod_EndTimeLocationGreaterThanEqual(
                         reservation.seatId(), reservationPeriod.getReservationDay(), reservationPeriod.getEndTimeLocation(),
                         reservationPeriod.getStartTimeLocation())) {
             throw new ConflictReservationException("Há um conflito de horário entre as reservas");
@@ -290,4 +308,5 @@ public class ReservationServiceImpl implements ReservationService {
             throw new SeatNotFoundException("Não foi localizado um seat de ID: " + reservation.seatId());
         }
     }
+
 }

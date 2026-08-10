@@ -1,5 +1,6 @@
 package com.gabsdev.findaseat.repository;
 
+import com.gabsdev.findaseat.dto.response.EmployeeResponse;
 import com.gabsdev.findaseat.model.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("""
             SELECT e.business.uuid FROM Employee e WHERE e.id = :id
             """)
-    UUID findBusinessUuid(@Param("id") Long id);
+    Optional<UUID> findBusinessUuid(@Param("id") Long id);
 
+    List<EmployeeResponse> findByBusiness_Uuid(UUID businessId);
 }
