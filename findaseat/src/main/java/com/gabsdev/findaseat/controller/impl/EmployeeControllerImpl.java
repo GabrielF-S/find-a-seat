@@ -46,7 +46,6 @@ public class EmployeeControllerImpl implements EmployeeController {
 
     @Override
     public ResponseEntity<List<EmployeeResponse>> getAllEmployess(UUID businessId) {
-        //TODO criar metodo para buscar todos os Employees por Business Uuid
         return ResponseEntity.ok(service.getAllEmployees(businessId));
     }
 
