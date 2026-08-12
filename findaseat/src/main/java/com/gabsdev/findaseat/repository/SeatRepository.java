@@ -34,4 +34,9 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
     UUID getBusinessUuid(@Param("uuid") UUID uuid);
 
     List<Seat> findByTypeAndFloor_Business_Uuid(Type type, UUID employeeBusinessUuid);
+
+    @Query("""
+            SELECT s.type FROM Seat s WHERE s.uuid = :uuid;
+            """)
+    Type findTypeById(@Param("uuid") UUID uuid);
 }
