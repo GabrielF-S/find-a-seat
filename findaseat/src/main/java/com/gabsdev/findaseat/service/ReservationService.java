@@ -27,17 +27,15 @@ public interface ReservationService {
 
     List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date);
 
-    ReservationResponse updateReservation(Reservation reservation);
-
     void deleteById(UUID uuid);
 
     List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date);
 
     List<ReservationResponse> getByDay(LocalDate localDate);
 
-    ReservationResponse close(UUID uuid, boolean isCancelled);
+    ReservationResponse close(UUID uuid);
 
-    ReservationResponse CreateQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime);
+    ReservationResponse createQuickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime);
 
     ReservationResponse updateReservation(UUID uuid, ReservationStatus reservationStatus);
 

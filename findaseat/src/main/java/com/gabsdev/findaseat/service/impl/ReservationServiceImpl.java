@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +68,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse CreateQuickReservation(QuickReservationRequest reservation,
+    public ReservationResponse createQuickReservation(QuickReservationRequest reservation,
                                                       LocalTime startTime, LocalTime endTime) {
         UUID employeeBusinessUuid = employeeRepository.findBusinessUuid(reservation.employeId());
         List<Seat> seatList = seatRepository
@@ -90,12 +91,17 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationResponse updateReservation(UUID uuid, ReservationStatus reservationStatus) {
-        Reservation reservation = repository.findById(uuid).orElseThrow(() -> new ReservationNotFoundException("Reservation Not found"));
+        Reservation reservation = repository.findById(uuid).orElseThrow(() -> new ReservationNotFoundException("Reservation Not Found"));
+        if (!reservation.isActive()){
+            throw  new ReservationDesativatedException("Não é possivel confirmar reserva com status: " + reservation.getReservationStatus().name());
+        }
         if (reservation.getReservationStatus().name().equalsIgnoreCase(reservationStatus.name())) {
             throw new ConflictReservationException("Reserva já esta " + reservationStatus.name());
         }
+        if(reservationStatus.name().equalsIgnoreCase("cancelled") ||reservationStatus.name().equalsIgnoreCase("finished")){
+            reservation.setActive(false);
+        }
         reservation.setReservationStatus(reservationStatus);
-        reservation.setActive(true);
         return mapper.toReservationResponse(repository.save(reservation));
     }
 
@@ -152,11 +158,6 @@ public class ReservationServiceImpl implements ReservationService {
         return responseList;
     }
 
-    @Override
-    public ReservationResponse updateReservation(Reservation reservation) {
-        Reservation updated = repository.save(reservation);
-        return mapper.toReservationResponse(updated);
-    }
 
     @Override
     public void deleteById(UUID uuid) {
@@ -186,13 +187,14 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse close(UUID uuid, boolean isCancelled) {
-        Reservation reservation = repository.findById(uuid).get();
+    public ReservationResponse close(UUID uuid) {
+        Reservation reservation = repository.findById(uuid).orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
+        if (!reservation.getReservationStatus().name().equalsIgnoreCase("confirmed")){
+            throw  new ReservationConflictException("Não é possivel fechar reserverva para status " + reservation.getReservationStatus().name());
+        }
         reservation.getReservationPeriod().setEndTimeLocation(LocalTime.now());
         reservation.setActive(false);
-        if (isCancelled) {
-            reservation.setReservationStatus(ReservationStatus.CANCELLED);
-        }
+        reservation.setReservationStatus(ReservationStatus.FINISHED);
         return mapper.toReservationResponse(repository.save(reservation));
     }
 
@@ -238,7 +240,7 @@ public class ReservationServiceImpl implements ReservationService {
         List<Reservation> reservationList = repository.findByActiveTrueAndReservationStatus(ReservationStatus.PENDING);
 
         reservationList.forEach(r -> {
-            if (r.getReservationPeriod().getStartTimeLocation().isBefore(LocalTime.now())) {
+            if (r.getReservationPeriod().getStartTimeLocation().isBefore(LocalTime.now().truncatedTo(ChronoUnit.MINUTES))) {
                 r.setActive(false);
                 r.setReservationStatus(ReservationStatus.NOT_CONFIRMED);
                 repository.save(r);

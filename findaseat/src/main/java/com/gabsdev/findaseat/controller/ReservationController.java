@@ -52,14 +52,11 @@ public interface ReservationController {
     @PatchMapping(value = "/updateReservationStatus/{uuid}")
     ResponseEntity<ReservationResponse> updateReservationStatus(@PathVariable(value = "uuid") UUID uuid, @RequestBody ReservationStatus reservationStatus);
 
-    @PutMapping(value = "/update")
-    ResponseEntity<ReservationResponse> updateReservation(@RequestBody Reservation reservation);
-
     @PatchMapping(value = "/confirmReservation/{uuid}")
     ResponseEntity<ReservationResponse> confirmReservation(@PathVariable(value = "uuid") UUID uuid);
 
     @PatchMapping("/closeReservation/{uuid}/")
-    ResponseEntity<ReservationResponse> closeReservation( @PathVariable(value = "uuid") UUID uuid, @RequestParam(name = "cancelled", required = true) boolean isCancelled );
+    ResponseEntity<ReservationResponse> closeReservation( @PathVariable(value = "uuid") UUID uuid);
 
     @DeleteMapping( value = "/delete/{uuid}")
     ResponseEntity<Void> deleteReservation(@PathVariable UUID uuid);

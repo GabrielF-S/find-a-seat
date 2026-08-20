@@ -40,7 +40,7 @@ public class ReservationControllerImpl implements ReservationController {
 
     @Override
     public ResponseEntity<ReservationResponse> quickReservation(QuickReservationRequest reservation, LocalTime startTime, LocalTime endTime) {
-        ReservationResponse reservationCreated = service.CreateQuickReservation(reservation, startTime, endTime);
+        ReservationResponse reservationCreated = service.createQuickReservation(reservation, startTime, endTime);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(reservationCreated.id()).toUri();
         return ResponseEntity.created(uri).build();
@@ -67,10 +67,6 @@ public class ReservationControllerImpl implements ReservationController {
         return ResponseEntity.ok(service.updateReservation(uuid, reservationStatus));
     }
 
-    @Override
-    public ResponseEntity<ReservationResponse> updateReservation(Reservation reservation) {
-        return ResponseEntity.ok(service.updateReservation(reservation));
-    }
 
     @Override
     public ResponseEntity<ReservationResponse> confirmReservation(UUID uuid) {
@@ -78,8 +74,8 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<ReservationResponse> closeReservation(UUID uuid, boolean isCancelled) {
-        return ResponseEntity.ok(service.close(uuid, isCancelled));
+    public ResponseEntity<ReservationResponse> closeReservation(UUID uuid) {
+        return ResponseEntity.ok(service.close(uuid));
     }
 
     @Override
