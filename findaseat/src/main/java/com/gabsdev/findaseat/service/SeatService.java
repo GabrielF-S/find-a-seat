@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface SeatService {
     Seat createSeat(SeatRequest seatRequest);
 
+    void verifyNumberOfSeats(SeatRequest seatRequest);
+
     Seat getSeatById(UUID uuid, UUID id, LocalDate localDate);
 
     List<SeatResponse> getAllBusinessSeat(UUID businessUuid, LocalDate localDate);

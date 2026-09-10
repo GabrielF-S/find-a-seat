@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
@@ -17,7 +18,7 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
     List<Seat> findByFloor_BusinessUuid(UUID businessUuid);
 
-    List<Seat> findByFloorId(UUID floorUuid);
+    Optional<List<Seat>> findByFloorId(UUID floorUuid);
 
     boolean existsBySeatNameAndFloorId(String s, UUID floorUuid);
 

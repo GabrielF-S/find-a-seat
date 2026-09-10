@@ -45,10 +45,9 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public Seat createSeat(SeatRequest seatRequest) {
-        verifyNumberofSeats(seatRequest);
-        verifyFloorById(seatRequest.floorId());
+        verifyNumberOfSeats(seatRequest);
         Floor floor = floorsRepository.findById(seatRequest.floorId())
-                .orElseThrow(()-> new FloorNoFoundException("Seat Not found"));
+                .orElseThrow(()-> new FloorNoFoundException("Floor: "+seatRequest.floorId() + ", Not found"));
         Seat seat = mapper.toSeat(seatRequest, floor);
         seat.setSeatName(slugify.slugify(seatRequest.type().name() + " " +
                 seatRequest.number()));
@@ -58,11 +57,12 @@ public class SeatServiceImpl implements SeatService {
         return seatRepository.save(seat);
     }
 
-    private void verifyNumberofSeats(SeatRequest seatRequest) {
+    @Override
+    public void verifyNumberOfSeats(SeatRequest seatRequest) {
         if((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()>1 ) &&
                 (seatRequest.type().name().equalsIgnoreCase("seat") ||
                 seatRequest.type().name().equalsIgnoreCase("desk") )){
-            throw new NumberOfSeatsException("The number of seats most be 1 for a" + seatRequest.type().name());
+            throw new NumberOfSeatsException("The number of seats most be 1 for a " + seatRequest.type().name());
         } else if ((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()<2 )&&
                 (seatRequest.type().name().equalsIgnoreCase("room") ||
                 seatRequest.type().name().equalsIgnoreCase("table"))) {
@@ -101,8 +101,8 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public List<SeatResponse> getAllSeatSByFloor(UUID floorUuid, LocalDate localDate) {
-        verifyFloorById(floorUuid);
-        List<Seat> seatList = seatRepository.findByFloorId(floorUuid);
+        List<Seat> seatList = seatRepository.findByFloorId(floorUuid)
+                .orElseThrow(() -> new FloorNoFoundException("Floor: "+ floorUuid + ", Not found"));
         List<Seat> seats = seatList.stream().map(seat -> verifyReservation(seat, localDate)).toList();
         return seats.stream().map(mapper::toSeatResponse).toList();
     }
@@ -126,11 +126,6 @@ public class SeatServiceImpl implements SeatService {
         }
     }
 
-    private void verifyFloorById(UUID floorId) {
-        if (!floorsRepository.existsById(floorId)) {
-            throw new FloorNoFoundException("Floor with id: " + floorId + " Not found");
-        }
-    }
 
     private void verifyBusinessById(UUID uuid) {
         if (!businessRepository.existsById(uuid)) {
