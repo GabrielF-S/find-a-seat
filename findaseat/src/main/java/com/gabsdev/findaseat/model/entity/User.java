@@ -3,14 +3,18 @@ package com.gabsdev.findaseat.model.entity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 @Entity
 @Table(name = "tb_users")
 @Builder
 @Data
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,5 +48,18 @@ public class User {
         this.password = password;
         this.roles = roles;
         this.employees = employees;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return  roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+    }
+
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 }
