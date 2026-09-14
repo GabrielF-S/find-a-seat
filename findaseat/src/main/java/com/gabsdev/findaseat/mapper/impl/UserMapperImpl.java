@@ -4,12 +4,17 @@ import com.gabsdev.findaseat.dto.request.RegisterUserRequest;
 import com.gabsdev.findaseat.dto.response.RegisterUserResponse;
 import com.gabsdev.findaseat.mapper.UserMapper;
 import com.gabsdev.findaseat.model.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapperImpl implements UserMapper {
     @Override
     public User toUser(RegisterUserRequest userToRegister) {
 
-        User user = new User(userToRegister.email(), userToRegister.password(), userToRegister.roles());
+        User user = User.builder()
+                .email(userToRegister.email())
+                .password(userToRegister.password())
+                .build();
 
         return user;
     }
