@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/business")
-@CrossOrigin("*")
 public class BusinessControllerImpl implements BusinessController {
 
     private final BusinessService service;

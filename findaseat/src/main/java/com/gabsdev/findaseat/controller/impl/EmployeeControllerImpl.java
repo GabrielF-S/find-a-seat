@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.UUID;
 @RestController
 @RequestMapping("api/employees")
-@CrossOrigin("*")
 public class EmployeeControllerImpl implements EmployeeController {
 
     private final EmployeeService service;

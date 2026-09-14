@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/floor")
-@CrossOrigin("*")
 public class FloorsControllerImpl implements FloorsController {
 
     private final FloorService service;
