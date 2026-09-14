@@ -14,6 +14,7 @@ import com.gabsdev.findaseat.repository.ReservationRepository;
 import com.gabsdev.findaseat.repository.SeatRepository;
 import com.gabsdev.findaseat.service.SeatService;
 import com.github.slugify.Slugify;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -71,6 +72,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
 
+
     @Override
     public Seat getSeatById(UUID businessUuid, UUID id, LocalDate localDate) {
         verifyBusinessById(businessUuid);
@@ -78,7 +80,9 @@ public class SeatServiceImpl implements SeatService {
         return verifyReservation(seatRepository.findByIdAndFloor_BusinessUuid(id, businessUuid), localDate);
     }
 
+
     @Override
+    @Cacheable("getAllSeatsByBusiness")
     public List<SeatResponse> getAllBusinessSeat(UUID businessUuid, LocalDate localDate) {
         verifyBusinessById(businessUuid);
         List<Seat> seatList = seatRepository.findByFloor_BusinessUuid(businessUuid);
@@ -100,6 +104,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
+    @Cacheable("getAllSeatsByFloor")
     public List<SeatResponse> getAllSeatSByFloor(UUID floorUuid, LocalDate localDate) {
         List<Seat> seatList = seatRepository.findByFloorId(floorUuid)
                 .orElseThrow(() -> new FloorNoFoundException("Floor: "+ floorUuid + ", Not found"));

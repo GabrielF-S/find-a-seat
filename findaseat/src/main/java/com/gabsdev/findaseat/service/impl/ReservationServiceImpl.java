@@ -11,6 +11,7 @@ import com.gabsdev.findaseat.model.enums.Type;
 import com.gabsdev.findaseat.repository.*;
 import com.gabsdev.findaseat.service.ReservationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -144,6 +145,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     @Override
+    @Cacheable("getReservation")
     public List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date) {
         List<ReservationResponse> responseList = new ArrayList<>();
         if (reservationId != null) {
@@ -168,6 +170,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Cacheable("getReservationByseatAndDate")
     public List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date) {
         if (date != null) {
             List<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndReservationPeriod_reservationDay(seatId, date);
@@ -178,6 +181,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Cacheable("getReservationByseat")
     public List<ReservationResponse> getByDay(LocalDate localDate) {
         if (localDate == null) {
             localDate = LocalDate.now();
@@ -199,6 +203,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Cacheable("getReservationPeding")
     public List<Reservation> verifyUnconfirmedReservations() {
         return repository.findByActiveTrueAndReservationStatus(ReservationStatus.PENDING);
     }
