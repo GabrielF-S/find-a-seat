@@ -9,7 +9,11 @@ import com.gabsdev.findaseat.model.entity.User;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.repository.UserRepository;
 import com.gabsdev.findaseat.service.UserService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UserServiceImpl implements UserService {
     private  final UserRepository repository;
     private final EmployeeRepository employeeRepository;
@@ -30,5 +34,10 @@ public class UserServiceImpl implements UserService {
         User saved = repository.save(user);
 
         return mapper.toUserResponse(saved);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException(username));
     }
 }
