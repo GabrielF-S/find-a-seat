@@ -5,8 +5,10 @@ import com.gabsdev.findaseat.dto.request.SeatRequest;
 import com.gabsdev.findaseat.dto.response.SeatResponse;
 import com.gabsdev.findaseat.model.entity.Seat;
 import com.gabsdev.findaseat.service.SeatService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -35,18 +37,18 @@ public class SeatControllerImpl implements SeatController {
     }
 
     @Override
-    public ResponseEntity<Seat> getSeatById(UUID businessUuid , UUID id, LocalDate localDate) {
-        return ResponseEntity.ok(seatService.getSeatById(businessUuid,id, localDate));
+    public ResponseEntity<Seat> getSeatById(UUID businessUuid, UUID id, LocalDate localDate) {
+        return ResponseEntity.ok(seatService.getSeatById(businessUuid, id, localDate));
     }
 
     @Override
-    public ResponseEntity<List<SeatResponse>> getAllSeat(UUID businessUuid, LocalDate localDate) {
-        return ResponseEntity.ok(seatService.getAllBusinessSeat(businessUuid, localDate));
+    public ResponseEntity<Page<SeatResponse>> getAllSeat(UUID businessUuid, LocalDate localDate, Integer page, Integer size) {
+        return ResponseEntity.ok(seatService.getAllBusinessSeat(businessUuid, localDate, page, size));
     }
 
     @Override
-    public ResponseEntity<List<SeatResponse>> getAllSeatByFloor(UUID floorUuid, LocalDate localDate) {
-        return ResponseEntity.ok(seatService.getAllSeatSByFloor(floorUuid, localDate));
+    public ResponseEntity<Page<SeatResponse>> getAllSeatByFloor(UUID floorUuid, LocalDate localDate, Integer page, Integer size) {
+        return ResponseEntity.ok(seatService.getAllSeatSByFloor(floorUuid, localDate, page, size));
     }
 
     @Override
@@ -56,8 +58,8 @@ public class SeatControllerImpl implements SeatController {
     }
 
     @Override
-    public ResponseEntity<Void> deleteSeat(UUID businessUuid ,UUID id) {
-        seatService.deleteByBusinessIuudAndSeatId(businessUuid,id);
+    public ResponseEntity<Void> deleteSeat(UUID businessUuid, UUID id) {
+        seatService.deleteByBusinessIuudAndSeatId(businessUuid, id);
         return ResponseEntity.noContent().build();
     }
 }

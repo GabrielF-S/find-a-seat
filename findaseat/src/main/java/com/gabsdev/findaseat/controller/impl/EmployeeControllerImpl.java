@@ -5,6 +5,7 @@ import com.gabsdev.findaseat.dto.request.EmployeeRequest;
 import com.gabsdev.findaseat.dto.response.EmployeeResponse;
 import com.gabsdev.findaseat.model.entity.Employee;
 import com.gabsdev.findaseat.service.EmployeeService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,9 +34,9 @@ public class EmployeeControllerImpl implements EmployeeController {
     }
 
     @Override
-    public ResponseEntity<List<EmployeeResponse>> getEmployesByName(String name) {
-       List<EmployeeResponse> responseList = service.getEmployees(name);
-        return ResponseEntity.ok(responseList);
+    public ResponseEntity<Page<EmployeeResponse>> getEmployesByName(UUID businessUuid, String name, Integer page,
+                                                                    Integer size) {
+        return ResponseEntity.ok(service.getEmployees(businessUuid,name, page, size));
     }
 
     @Override
@@ -44,8 +45,9 @@ public class EmployeeControllerImpl implements EmployeeController {
     }
 
     @Override
-    public ResponseEntity<List<EmployeeResponse>> getAllEmployess(UUID businessId) {
-        return ResponseEntity.ok(service.getAllEmployees(businessId));
+    public ResponseEntity<Page<EmployeeResponse>> getAllEmployess(UUID businessId, Integer page,
+                                                                  Integer size) {
+        return ResponseEntity.ok(service.getAllEmployees(businessId, page, size));
     }
 
     @Override

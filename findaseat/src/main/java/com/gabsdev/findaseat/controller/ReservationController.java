@@ -7,6 +7,7 @@ import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,20 +35,26 @@ public interface ReservationController {
     );
 
     @GetMapping(value = "/getReservation")
-    ResponseEntity<List<ReservationResponse>> getReservation(
+    ResponseEntity<Page<ReservationResponse>> getReservation(
             @RequestParam(value = "id", required = false) UUID reservationId,
             @RequestParam(value = "name", required = false, defaultValue = "") String employeeName,
-            @RequestParam(value ="dia", required = false)LocalDate date
+            @RequestParam(value ="dia", required = false)LocalDate date,
+            @RequestParam(value="page", defaultValue = "0") Integer page,
+            @RequestParam(value="size", defaultValue = "10") Integer size
             );
 
     @GetMapping(value = "/getReservationBySeat")
-    ResponseEntity<List<ReservationResponse>> getReservationSeat(
+    ResponseEntity<Page<ReservationResponse>> getReservationSeat(
             @RequestParam(value = "seatId") UUID seatId,
-            @RequestParam(value ="dia", required = false)LocalDate date
+            @RequestParam(value ="dia", required = false)LocalDate date,
+            @RequestParam(value="page", defaultValue = "0") Integer page,
+            @RequestParam(value="size", defaultValue = "10") Integer size
     );
 
     @GetMapping("/byDay")
-    ResponseEntity<List<ReservationResponse>> getReservationByDay(@RequestParam(value = "day") LocalDate localDate);
+    ResponseEntity<Page<ReservationResponse>> getReservationByDay(@RequestParam(value = "day") LocalDate localDate,
+                                                                  @RequestParam(value="page", defaultValue = "0") Integer page,
+                                                                  @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @PatchMapping(value = "/updateReservationStatus/{uuid}")
     ResponseEntity<ReservationResponse> updateReservationStatus(@PathVariable(value = "uuid") UUID uuid, @RequestBody ReservationStatus reservationStatus);

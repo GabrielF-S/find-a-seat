@@ -6,9 +6,11 @@ import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
 import com.gabsdev.findaseat.service.FloorService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,20 +30,20 @@ public class FloorsControllerImpl implements FloorsController {
 
 
     @Override
-    public ResponseEntity<Floor> createFloor(FloorRequest request) {
+    public ResponseEntity<FloorResponse> createFloor(FloorRequest request) {
         Floor creted = service.creteFloor(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(creted.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }
 
     @Override
-    public ResponseEntity<Floor> getFloorById(UUID uuid) {
+    public ResponseEntity<FloorResponse> getFloorById(UUID uuid) {
         return ResponseEntity.ok(service.getById(uuid));
     }
 
     @Override
-    public ResponseEntity<List<FloorResponse>> getAllFloors(UUID businessUuid) {
-        return ResponseEntity.ok(service.getAll(businessUuid));
+    public ResponseEntity<Page<FloorResponse>> getAllFloors(UUID businessUuid,  Integer page,Integer size) {
+        return ResponseEntity.ok(service.getAll(businessUuid, page, size));
     }
 
     @Override
@@ -50,13 +52,13 @@ public class FloorsControllerImpl implements FloorsController {
     }
 
     @Override
-    public ResponseEntity<Floor> updateFloor(Floor floor) {
+    public ResponseEntity<FloorResponse> updateFloor(Floor floor) {
 
         return ResponseEntity.ok(service.updateFloor(floor));
     }
 
     @Override
-    public ResponseEntity<Floor> insertLayout(UUID uuid, String layout) {
+    public ResponseEntity<FloorResponse> insertLayout(UUID uuid, String layout) {
         return ResponseEntity.ok(service.insertLayout(uuid, layout));
     }
 

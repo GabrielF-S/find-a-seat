@@ -5,6 +5,7 @@ import com.gabsdev.findaseat.dto.response.EmployeeResponse;
 import com.gabsdev.findaseat.model.entity.Employee;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,9 +19,12 @@ public interface EmployeeController {
     ResponseEntity<EmployeeResponse> registerEmployee(@RequestBody EmployeeRequest employeeRequest,
                                                       @PathVariable(value = "businessUuid") UUID businessUuid);
 
-    @GetMapping(value = "/getEmployeeByName")
-    ResponseEntity<List<EmployeeResponse>> getEmployesByName(
-            @RequestParam(name = "name", required = true, defaultValue = "") String name);
+    @GetMapping(value = "/{businessUuid}/getEmployeeByName")
+    ResponseEntity<Page<EmployeeResponse>> getEmployesByName(
+            @PathVariable(value = "businessUuid") UUID businessUuid,
+            @RequestParam(name = "name", required = true, defaultValue = "") String name,
+            @RequestParam(value="page", defaultValue = "0") Integer page,
+            @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @GetMapping(value = "/{businessUuid}/{employeeId}")
     ResponseEntity<EmployeeResponse> getEmployeeyId(
@@ -29,8 +33,10 @@ public interface EmployeeController {
             );
 
 
-    @GetMapping
-    ResponseEntity<List<EmployeeResponse>> getAllEmployess(@PathVariable UUID businessId);
+    @GetMapping(value = "/{businessUuid}/getAll")
+    ResponseEntity<Page<EmployeeResponse>> getAllEmployess(@PathVariable(value = "businessUuid") UUID businessUuid,
+                                                           @RequestParam(value="page", defaultValue = "0") Integer page,
+                                                           @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @PutMapping
     ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee);

@@ -7,8 +7,10 @@ import com.gabsdev.findaseat.dto.response.ReservationResponse;
 import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.service.ReservationService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -47,18 +49,18 @@ public class ReservationControllerImpl implements ReservationController {
     }
 
     @Override
-    public ResponseEntity<List<ReservationResponse>> getReservation(UUID reservationId, String employeeName, LocalDate date) {
-        return  ResponseEntity.ok(service.getReservation(reservationId, employeeName, date));
+    public ResponseEntity<Page<ReservationResponse>> getReservation(UUID reservationId, String employeeName, LocalDate date, Integer page, Integer size) {
+        return  ResponseEntity.ok(service.getReservation(reservationId, employeeName, date,  page,  size));
     }
 
     @Override
-    public ResponseEntity<List<ReservationResponse>> getReservationSeat(UUID seatId, LocalDate date) {
-        return ResponseEntity.ok(service.getBySeatAndData(seatId, date));
+    public ResponseEntity<Page<ReservationResponse>> getReservationSeat(UUID seatId, LocalDate date,  Integer page, Integer size) {
+        return ResponseEntity.ok(service.getBySeatAndData(seatId, date, page, size));
     }
 
     @Override
-    public ResponseEntity<List<ReservationResponse>> getReservationByDay(LocalDate localDate) {
-        return ResponseEntity.ok(service.getByDay(localDate));
+    public ResponseEntity<Page<ReservationResponse>> getReservationByDay(LocalDate localDate, Integer page, Integer size) {
+        return ResponseEntity.ok(service.getByDay(localDate, page, size));
     }
 
     @Override

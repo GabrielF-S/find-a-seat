@@ -6,6 +6,7 @@ import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,23 +17,25 @@ import java.util.UUID;
 public interface FloorsController {
 
     @PostMapping()
-    ResponseEntity<Floor> createFloor(@RequestBody FloorRequest request);
+    ResponseEntity<FloorResponse> createFloor(@RequestBody FloorRequest request);
 
     @GetMapping(value = "/{uuid}")
-    ResponseEntity<Floor> getFloorById(@PathVariable UUID uuid);
+    ResponseEntity<FloorResponse> getFloorById(@PathVariable UUID uuid);
 
     @GetMapping(value = "/{businessUuid}/getAll")
-    ResponseEntity<List<FloorResponse>> getAllFloors(@PathVariable UUID businessUuid);
+    ResponseEntity<Page<FloorResponse>> getAllFloors(@PathVariable UUID businessUuid,
+                                                     @RequestParam(value="page", defaultValue = "0") Integer page,
+                                                     @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @GetMapping(value = "/getLayout/{uuid}")
     ResponseEntity<LayoutResponse> getLayoutByFloorUuid(@PathVariable UUID uuid);
 
 
     @PutMapping(value = "/update")
-    ResponseEntity<Floor> updateFloor(@RequestBody Floor floor);
+    ResponseEntity<FloorResponse> updateFloor(@RequestBody Floor floor);
 
     @PatchMapping(value = "insertLayout/{uuid}")
-    ResponseEntity<Floor> insertLayout(@PathVariable UUID uuid ,@RequestBody String layout);
+    ResponseEntity<FloorResponse> insertLayout(@PathVariable UUID uuid ,@RequestBody String layout);
 
 
     @DeleteMapping(value = "/delete/{uuid}")

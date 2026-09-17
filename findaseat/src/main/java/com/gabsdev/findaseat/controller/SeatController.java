@@ -6,6 +6,7 @@ import com.gabsdev.findaseat.model.entity.Seat;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.websocket.server.PathParam;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +24,16 @@ public interface SeatController {
     ResponseEntity<Seat> getSeatById(@PathVariable("businessUuid") UUID businessUuid, @PathVariable("id") UUID id,  @RequestParam(name = "date", required = false)LocalDate localDate);
 
     @GetMapping(value = "{businessUuid}/getAll")
-    ResponseEntity<List<SeatResponse>> getAllSeat(@PathVariable("businessUuid") UUID businessUuid, @RequestParam(name = "date", required = false)LocalDate localDate);
+    ResponseEntity<Page<SeatResponse>> getAllSeat(@PathVariable("businessUuid") UUID businessUuid,
+                                                  @RequestParam(name = "date", required = false)LocalDate localDate,
+                                                  @RequestParam(value="page", defaultValue = "0") Integer page,
+                                                  @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @GetMapping(value = "{floorUuid}/getAllByFloor")
-    ResponseEntity<List<SeatResponse>> getAllSeatByFloor(@PathVariable("floorUuid") UUID floorUuid,  @RequestParam(name = "date", required = false)LocalDate localDate);
+    ResponseEntity<Page<SeatResponse>> getAllSeatByFloor(@PathVariable("floorUuid") UUID floorUuid,
+                                                         @RequestParam(name = "date", required = false) LocalDate localDate,
+                                                         @RequestParam(value="page", defaultValue = "0") Integer page,
+                                                         @RequestParam(value="size", defaultValue = "10") Integer size);
 
     @PutMapping(value = "/update")
     ResponseEntity<Seat> updateSeat(@RequestBody Seat seat);
