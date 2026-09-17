@@ -10,7 +10,7 @@ import java.time.LocalTime;
 @Embeddable
 @Data
 @Builder
-public class ReservationPeriod {
+public class ReservationPeriod implements Comparable<ReservationPeriod> {
 
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate reservationDay;
@@ -28,5 +28,16 @@ public class ReservationPeriod {
         this.endTimeLocation = endTimeLocation;
     }
 
-
+    @Override
+    public int compareTo(ReservationPeriod other) {
+        // Null safety check
+        if (other == null) {
+            throw new NullPointerException("Cannot compare with null");
+        }
+        int comparation = this.getReservationDay().compareTo(other.getReservationDay());
+        if (comparation != 0){
+            return comparation;
+        }
+        return this.getStartTimeLocation().compareTo(other.getStartTimeLocation());
+    }
 }
