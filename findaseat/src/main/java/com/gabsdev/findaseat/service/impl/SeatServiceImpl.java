@@ -15,6 +15,9 @@ import com.gabsdev.findaseat.repository.SeatRepository;
 import com.gabsdev.findaseat.service.SeatService;
 import com.github.slugify.Slugify;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,7 +33,7 @@ public class SeatServiceImpl implements SeatService {
     private final BusinessRepository businessRepository;
     private final SeatMapper mapper;
     private final Slugify slugify;
-    private  final ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
 
     public SeatServiceImpl(SeatRepository seatRepository,
                            FloorsRepository floorsRepository,
@@ -48,7 +51,7 @@ public class SeatServiceImpl implements SeatService {
     public Seat createSeat(SeatRequest seatRequest) {
         verifyNumberOfSeats(seatRequest);
         Floor floor = floorsRepository.findById(seatRequest.floorId())
-                .orElseThrow(()-> new FloorNoFoundException("Floor: "+seatRequest.floorId() + ", Not found"));
+                .orElseThrow(() -> new FloorNoFoundException("Floor: " + seatRequest.floorId() + ", Not found"));
         Seat seat = mapper.toSeat(seatRequest, floor);
         seat.setSeatName(slugify.slugify(seatRequest.type().name() + " " +
                 seatRequest.number()));
@@ -60,17 +63,16 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public void verifyNumberOfSeats(SeatRequest seatRequest) {
-        if((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()>1 ) &&
+        if ((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats() > 1) &&
                 (seatRequest.type().name().equalsIgnoreCase("seat") ||
-                seatRequest.type().name().equalsIgnoreCase("desk") )){
+                        seatRequest.type().name().equalsIgnoreCase("desk"))) {
             throw new NumberOfSeatsException("The number of seats most be 1 for a " + seatRequest.type().name());
-        } else if ((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats()<2 )&&
+        } else if ((seatRequest.numberOfSeats() == null || seatRequest.numberOfSeats() < 2) &&
                 (seatRequest.type().name().equalsIgnoreCase("room") ||
-                seatRequest.type().name().equalsIgnoreCase("table"))) {
+                        seatRequest.type().name().equalsIgnoreCase("table"))) {
             throw new NumberOfSeatsException("Is required define a number of seats bigger that 1 for a " + seatRequest.type().name());
         }
     }
-
 
 
     @Override
@@ -83,18 +85,22 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     @Cacheable("getAllSeatsByBusiness")
-    public List<SeatResponse> getAllBusinessSeat(UUID businessUuid, LocalDate localDate) {
+    public Page<SeatResponse> getAllBusinessSeat(UUID businessUuid, LocalDate localDate, Integer page, Integer size) {
         verifyBusinessById(businessUuid);
-        List<Seat> seatList = seatRepository.findByFloor_BusinessUuid(businessUuid);
-        List<Seat> seats = seatList.stream().map(seat -> verifyReservation(seat, localDate)).toList();
-        return seats.stream().map(mapper::toSeatResponse).toList();
+
+        Sort sort = Sort.by(Sort.Direction.ASC, "seatName");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        Page<Seat> seatList = seatRepository.findByFloor_BusinessUuid(businessUuid, pageRequest);
+        Page<Seat> seats =   seatList.map(seat -> verifyReservation(seat, localDate));
+
+        return seats.map(mapper::toSeatResponse);
     }
 
     private Seat verifyReservation(Seat seat, LocalDate localDate) {
-        if (localDate == null){
+        if (localDate == null) {
             localDate = LocalDate.now();
         }
-        if(reservationRepository.existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(seat.getId(), localDate)){
+        if (reservationRepository.existsBySeat_IdAndReservationPeriod_reservationDayAndActiveTrue(seat.getId(), localDate)) {
             List<Reservation> bySeatIdAndDateReservationDay = reservationRepository.findBySeat_IdAndReservationPeriod_reservationDay(seat.getId(), localDate);
             if (bySeatIdAndDateReservationDay.stream().anyMatch(Reservation::isActive)) {
                 seat.setStatus(Status.RESERVED);
@@ -105,11 +111,14 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     @Cacheable("getAllSeatsByFloor")
-    public List<SeatResponse> getAllSeatSByFloor(UUID floorUuid, LocalDate localDate) {
-        List<Seat> seatList = seatRepository.findByFloorId(floorUuid)
-                .orElseThrow(() -> new FloorNoFoundException("Floor: "+ floorUuid + ", Not found"));
-        List<Seat> seats = seatList.stream().map(seat -> verifyReservation(seat, localDate)).toList();
-        return seats.stream().map(mapper::toSeatResponse).toList();
+    public Page<SeatResponse> getAllSeatSByFloor(UUID floorUuid, LocalDate localDate, Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "seatName");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
+        Page<Seat> seatList = seatRepository.findByFloorId(floorUuid, pageRequest)
+                .orElseThrow(() -> new FloorNoFoundException("Floor: " + floorUuid + ", Not found"));
+        Page<Seat> seats = seatList.map(seat -> verifyReservation(seat, localDate));
+        return seats.map(mapper::toSeatResponse);
     }
 
     @Override
@@ -140,7 +149,7 @@ public class SeatServiceImpl implements SeatService {
 
     private void verifiExistsSeat(Seat seat) {
         if (seatRepository
-                .existsBySeatNameAndFloorId(seat.getSeatName(),seat.getFloor().getId())
+                .existsBySeatNameAndFloorId(seat.getSeatName(), seat.getFloor().getId())
         ) {
             throw new SeatAlredyExistException("Seat already exist");
         }

@@ -4,6 +4,7 @@ import com.gabsdev.findaseat.dto.request.FloorRequest;
 import com.gabsdev.findaseat.dto.response.FloorResponse;
 import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.model.entity.Floor;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,15 +12,15 @@ import java.util.UUID;
 public interface FloorService {
     Floor creteFloor(FloorRequest request);
 
-    Floor getById(UUID uuid);
+    FloorResponse getById(UUID uuid);
 
-    Floor updateFloor(Floor floor);
+    FloorResponse updateFloor(Floor floor);
 
-    List<FloorResponse> getAll(UUID businessUuid);
+    Page<FloorResponse> getAll(UUID businessUuid, Integer page, Integer size);
 
     void deleteById(UUID uuid);
 
-    Floor insertLayout(UUID uuid, String layout);
+    FloorResponse insertLayout(UUID uuid, String layout);
 
     LayoutResponse getLayoutByUuid(UUID uuid);
 }

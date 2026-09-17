@@ -7,6 +7,7 @@ import com.gabsdev.findaseat.model.entity.Reservation;
 import com.gabsdev.findaseat.model.entity.ReservationPeriod;
 import com.gabsdev.findaseat.model.enums.ReservationStatus;
 import com.gabsdev.findaseat.model.enums.Type;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,13 +26,13 @@ public interface ReservationService {
 
     void verifyEmployeeAbleToReserve(Long employeId, Type type);
 
-    List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date);
+    Page<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date , Integer page, Integer size);
 
     void deleteById(UUID uuid);
 
-    List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date);
+    Page<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date, Integer page, Integer size);
 
-    List<ReservationResponse> getByDay(LocalDate localDate);
+    Page<ReservationResponse> getByDay(LocalDate localDate, Integer page, Integer size);
 
     ReservationResponse close(UUID uuid);
 
@@ -59,4 +60,5 @@ public interface ReservationService {
 
     void verifyEmployee(ReservationRequest reservation);
 
+    void closePastReservations();
 }

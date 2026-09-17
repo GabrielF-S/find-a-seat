@@ -12,6 +12,9 @@ import com.gabsdev.findaseat.repository.*;
 import com.gabsdev.findaseat.service.ReservationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +22,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -146,17 +148,18 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Cacheable("getReservation")
-    public List<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date) {
-        List<ReservationResponse> responseList = new ArrayList<>();
+    public Page<ReservationResponse> getReservation(UUID reservationId, String employeeName, LocalDate date , Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
         if (reservationId != null) {
-            responseList.add(findById(reservationId));
-            return responseList;
+            return  repository.findById(reservationId, pageRequest).map(mapper::toReservationResponse);
         }
         if (date == null) {
             date = LocalDate.now();
         }
-        List<Reservation> reservations = repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay("%" + employeeName + "%", date);
-        responseList = reservations.stream().map(mapper::toReservationResponse).toList();
+        Page<Reservation> reservations = repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay("%" + employeeName + "%", date, pageRequest);
+        Page<ReservationResponse> responseList = reservations.map(mapper::toReservationResponse);
         return responseList;
     }
 
@@ -171,23 +174,28 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Cacheable("getReservationByseatAndDate")
-    public List<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date) {
+    public Page<ReservationResponse> getBySeatAndData(UUID seatId, LocalDate date, Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+
         if (date != null) {
-            List<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndReservationPeriod_reservationDay(seatId, date);
-            return bySeatIdAndDateReservationDay.stream().map(mapper::toReservationResponse).toList();
+            Page<Reservation> bySeatIdAndDateReservationDay = repository.findBySeat_IdAndReservationPeriod_reservationDay(seatId, date, pageRequest);
+            return bySeatIdAndDateReservationDay.map(mapper::toReservationResponse);
         }
-        List<Reservation> reservation = repository.findBySeat_Id(seatId);
-        return reservation.stream().map(mapper::toReservationResponse).toList();
+        Page<Reservation> reservation = repository.findBySeat_Id(seatId, pageRequest);
+        return reservation.map(mapper::toReservationResponse);
     }
 
     @Override
     @Cacheable("getReservationByseat")
-    public List<ReservationResponse> getByDay(LocalDate localDate) {
+    public Page<ReservationResponse> getByDay(LocalDate localDate, Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
         if (localDate == null) {
             localDate = LocalDate.now();
         }
-        List<Reservation> byDateReservationDay = repository.findByReservationPeriod_reservationDay(localDate);
-        return byDateReservationDay.stream().map(mapper::toReservationResponse).toList();
+        Page<Reservation> byDateReservationDay = repository.findByReservationPeriod_reservationDay(localDate, pageRequest);
+        return byDateReservationDay.map(mapper::toReservationResponse);
     }
 
     @Override
@@ -312,6 +320,20 @@ public class ReservationServiceImpl implements ReservationService {
         if (!employeeRepository.existsById(reservation.employeId())) {
             throw new EmployeeNotFoundException("Funcionario não localizado!");
         }
+    }
+
+    @Override
+    public void closePastReservations() {
+        LocalDate today = LocalDate.now();
+        List<Reservation> reservationsToClose = repository.findByActiveTrueAndReservationPeriod_ReservationDayLessThan(today);
+        reservationsToClose
+                .stream()
+                .filter(reservation -> reservation
+                        .getReservationPeriod()
+                        .getReservationDay()
+                        .isBefore(today))
+                .peek(reservation -> reservation.setActive(false))
+                .forEach(repository::save);
     }
 
 }

@@ -10,10 +10,11 @@ import com.gabsdev.findaseat.model.entity.Employee;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.repository.EmployeeRepository;
 import com.gabsdev.findaseat.service.EmployeeService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,13 +47,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponse> getEmployees(String name) {
+    public Page<EmployeeResponse> getEmployees(UUID businessUuid, String name, Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "employee_name");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
 
-        List<Employee> employeeList = repository.findByEmployeeName("%" + name + "%").get();
-        if (employeeList.isEmpty()){
-            throw  new EmployeeNotFoundException("Não foi possivel localizar um funcionario com o nome"+ name);
-        }
-        return employeeList.stream().map(mapper::toEmployeeResponse).toList();
+        name = name.trim();
+        name = name.replaceAll(" ", " & ");
+
+        System.out.println(name);
+
+        Page<Employee> employeeList = repository.findByEmployeeName(name, businessUuid, pageRequest);
+
+        return employeeList.map(mapper::toEmployeeResponse);
     }
 
     @Override
@@ -78,8 +84,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<EmployeeResponse> getAllEmployees(UUID businessId) {
-        return repository.findByBusiness_Uuid(businessId);
+    public Page<EmployeeResponse> getAllEmployees(UUID businessId, Integer page, Integer size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "employeeName");
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        Page<Employee> employeePage = repository.findByBusiness_Uuid(businessId, pageRequest);
+        return employeePage.map(mapper::toEmployeeResponse);
     }
 
     private void verifyBusinessByUuid(UUID businessUuid) {

@@ -2,6 +2,8 @@ package com.gabsdev.findaseat.repository;
 
 import com.gabsdev.findaseat.model.entity.Seat;
 import com.gabsdev.findaseat.model.enums.Type;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,9 +18,9 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
     Seat findByIdAndFloor_BusinessUuid(UUID id, UUID businessUuid);
 
-    List<Seat> findByFloor_BusinessUuid(UUID businessUuid);
+    Page<Seat> findByFloor_BusinessUuid(UUID businessUuid, Pageable pageable);
 
-    Optional<List<Seat>> findByFloorId(UUID floorUuid);
+    Optional<Page<Seat>> findByFloorId(UUID floorUuid, Pageable pageable);
 
     boolean existsBySeatNameAndFloorId(String s, UUID floorUuid);
 

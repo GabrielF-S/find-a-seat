@@ -6,19 +6,19 @@ import com.gabsdev.findaseat.dto.response.LayoutResponse;
 import com.gabsdev.findaseat.exception.BusinessNotFoundException;
 import com.gabsdev.findaseat.exception.FloorAlredyExistException;
 import com.gabsdev.findaseat.exception.FloorNoFoundException;
-import com.gabsdev.findaseat.exception.SeatNotFoundException;
 import com.gabsdev.findaseat.mapper.FloorMapper;
 import com.gabsdev.findaseat.model.entity.Business;
 import com.gabsdev.findaseat.model.entity.Floor;
-import com.gabsdev.findaseat.model.enums.BusinessType;
 import com.gabsdev.findaseat.repository.BusinessRepository;
 import com.gabsdev.findaseat.repository.FloorsRepository;
 import com.gabsdev.findaseat.service.FloorService;
 import com.github.slugify.Slugify;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -62,22 +62,24 @@ public class FloorServiceImpl implements FloorService {
     }
 
     @Override
-    public Floor getById(UUID uuid) {
+    public FloorResponse getById(UUID uuid) {
         verifyById(uuid);
-        return floorsRepository.findById(uuid).get();
+        return mapper.toFloorResponse(floorsRepository.findById(uuid).get());
     }
 
     @Override
-    public Floor updateFloor(Floor floor) {
+    public FloorResponse updateFloor(Floor floor) {
         verifyById(floor.getId());
-        return floorsRepository.save(floor);
+        return mapper.toFloorResponse(floorsRepository.save(floor));
     }
 
     @Override
-    public List<FloorResponse> getAll(UUID businessUuid) {
+    public Page<FloorResponse> getAll(UUID businessUuid, Integer page, Integer size) {
         verifyBusiness(businessUuid);
-        List<Floor> byBusinessUuid = floorsRepository.findByBusinessUuid(businessUuid);
-        return byBusinessUuid.stream().map(mapper::toFloorResponse).toList();
+        Sort sort = Sort.by(Sort.Direction.ASC, "floorName");
+        PageRequest pageRequest = PageRequest.of(page,size, sort);
+        Page<Floor> byBusinessUuid = floorsRepository.findByBusinessUuid(businessUuid, pageRequest);
+        return byBusinessUuid.map(mapper::toFloorResponse);
     }
 
     @Override
@@ -87,11 +89,11 @@ public class FloorServiceImpl implements FloorService {
     }
 
     @Override
-    public Floor insertLayout(UUID uuid, String layout) {
+    public FloorResponse insertLayout(UUID uuid, String layout) {
         Floor floor = floorsRepository.findById(uuid)
                 .orElseThrow(() -> new FloorNoFoundException("Floor not found"));
         floor.setLayout(layout);
-        return floorsRepository.save(floor);
+        return mapper.toFloorResponse(floorsRepository.save(floor));
     }
 
     @Override

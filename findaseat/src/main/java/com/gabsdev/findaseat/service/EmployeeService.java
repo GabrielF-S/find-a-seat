@@ -3,15 +3,14 @@ package com.gabsdev.findaseat.service;
 import com.gabsdev.findaseat.dto.request.EmployeeRequest;
 import com.gabsdev.findaseat.dto.response.EmployeeResponse;
 import com.gabsdev.findaseat.model.entity.Employee;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface EmployeeService {
     EmployeeResponse createEmployee(EmployeeRequest employeeRequest, UUID businessUuid);
 
-    List<EmployeeResponse> getEmployees(String name);
+    Page<EmployeeResponse> getEmployees(UUID businessUuid, String name, Integer page, Integer size);
 
     EmployeeResponse getEmployeeyId(UUID businessUuid, Long employeeId);
 
@@ -19,5 +18,5 @@ public interface EmployeeService {
 
     void deleteById(Long id);
 
-    List<EmployeeResponse> getAllEmployees(UUID businessId);
+    Page<EmployeeResponse> getAllEmployees(UUID businessId, Integer page, Integer size);
 }
