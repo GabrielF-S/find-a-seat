@@ -8,5 +8,7 @@ public interface ReservationWorker {
 
     void verificarReservas();
 
+    void closedReservations();
+
     void sendNotification(Reservation reservation);
 }

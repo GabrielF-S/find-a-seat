@@ -44,6 +44,14 @@ public class ReservationWorkerImpl implements ReservationWorker {
         service.verifyInactivedReservations();
     }
 
+    @Scheduled(fixedRate = 43200000)
+    @Override
+    public void closedReservations(){
+
+        log.info("Verificando reservas ativas");
+        service.closePastReservations();
+    }
+
     @Override
     public void sendNotification(Reservation reservation) {
         service.sendNotificationReservation(reservation);
