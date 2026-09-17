@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -113,6 +114,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Seat not found", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldThrowsExceptionWhenEmployeeBusinessUuidAndSeatBusinessUuidIsNotEqual() {
         // cenario
@@ -133,6 +135,7 @@ class ReservationServiceImplTest {
 
 
     }
+
     @Test
     void shouldThrowsExceptionWhenReservationPeriodBeforeThatToday() {
         // cenario
@@ -153,6 +156,7 @@ class ReservationServiceImplTest {
                 exception.toProblemDetail().getDetail());
 
     }
+
     @Test
     void shouldThrowsExceptionWhenEmployeeHaveThanMoreOneReservationForTheSameType() {
         UUID employeeBusinessUuid = UUID.fromString("088098f8-27e8-4d2c-a93c-b480c5d20790");
@@ -178,6 +182,7 @@ class ReservationServiceImplTest {
                         " Ativa, finalize ela para poder realizar uma nova reserva",
                 exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldDefineStartTimeReservationAt8AMWhenTypeLikeDesk() {
         //cenario
@@ -196,6 +201,7 @@ class ReservationServiceImplTest {
         assertEquals(LocalTime.parse("08:00"), reservationPeriod.getStartTimeLocation());
 
     }
+
     @Test
     void shouldDefineTimeEndReservationAt18PMWhenTypeLikeDesk() {
         //cenario
@@ -212,6 +218,7 @@ class ReservationServiceImplTest {
         assertEquals(LocalTime.parse("18:00"), reservationPeriod.getEndTimeLocation());
 
     }
+
     @Test
     void shouldDefineReservationDayForTodayWhenReservationDayIsNull() {
         //cenario
@@ -228,6 +235,7 @@ class ReservationServiceImplTest {
         assertEquals(LocalDate.now(), reservationPeriod.getReservationDay());
 
     }
+
     @Test
     void shouldNotDefineReservationDayForTodayWhenReservationDayIsNull() {
         //cenario
@@ -243,6 +251,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals(LocalDate.parse("2026-08-13"), reservationPeriod.getReservationDay());
     }
+
     @Test
     void shouldThrowsExceptionWhenStartTimeIsNullAndTypeNotDesk() {
         //cenario
@@ -257,6 +266,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Horario de inicio/fim deve ser informado", findASetException.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldThrowsExceptionWhenEndTimeIsNullAndTypeNotDesk() {
         //cenario
@@ -271,6 +281,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Horario de inicio/fim deve ser informado", findASetException.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldTrowsExceptionWhenAlreadyHaveReservationInPeriod() {
         when(repository
@@ -285,6 +296,7 @@ class ReservationServiceImplTest {
 
         assertEquals("Há um conflito de horário entre as reservas", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldVerifyIfSaveMethodeIsInvokedWhenNotHaveExceptions() {
         //cenario
@@ -308,6 +320,7 @@ class ReservationServiceImplTest {
         //verifição
         verify(repository, times(1)).save(any());
     }
+
     @Test
     void shouldThrosExceptionWhenEmployeeNotFound() {
         //cenario
@@ -320,6 +333,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Funcionario não localizado!", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldThrowExceptionWHenNoHaveTableAvaliable() {
         //cenario
@@ -337,6 +351,7 @@ class ReservationServiceImplTest {
         assertEquals("Reserva adicionada a fila de espera ID: 1", exception.toProblemDetail().getDetail());
 
     }
+
     @Test
     void shouldVerifyIfCreateReservationIsCalled() {
         //cenario
@@ -365,6 +380,7 @@ class ReservationServiceImplTest {
         verify(repository, times(1)).save(any());
 
     }
+
     @Test
     void shouldThrowsExceptionWhenReservationNotFound() {
         //cenario
@@ -377,6 +393,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Reservation Not Found", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldThrowsEsceptionWHenReservationActiveIsFalse() {
         //cenario
@@ -392,6 +409,7 @@ class ReservationServiceImplTest {
         assertEquals("Não é possivel confirmar reserva com status: NOT_CONFIRMED", exception.toProblemDetail().getDetail());
 
     }
+
     @Test
     void shouldThrowsExceptionWhenReservationStatusAlreadySetting() {
         //cenario
@@ -406,6 +424,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Reserva já esta CONFIRMED", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldVerifyIfMapperCalled() {
         //cenario
@@ -421,16 +440,22 @@ class ReservationServiceImplTest {
         verify(mapper, atLeastOnce()).toReservationResponse(reservation1);
 
     }
+
     @Test
     void shouldReturnOnlyOneReservationWhenPassedReservationUuid() {
         //cenario
         UUID reservationUuid = UUID.fromString("088098f8-27e8-4d2c-a93c-b480c5d20790");
-        when(repository.findById(reservationUuid)).thenReturn(Optional.of(reservation));
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
+        PageRequest pageRequest = PageRequest.of(0, 10, sort);
+        Page<Reservation> reservationPage =
+                new PageImpl<>(List.of(reservation), pageRequest, 1);
+        when(repository.findById(reservationUuid, pageRequest)).thenReturn(reservationPage);
         //ação
-        List<ReservationResponse> reservation1 = reservationService.getReservation(reservationUuid, "flink", LocalDate.now());
+        Page<ReservationResponse> reservation1 = reservationService.getReservation(reservationUuid, "flink", LocalDate.now(), 0, 10 );
         //verificação
-        assertEquals(1, reservation1.size());
+        assertEquals(1, reservation1.getNumberOfElements());
     }
+
     @Test
     void shouldDefineActiveFalseWhenStatusCancelled() {
         //cenario
@@ -450,6 +475,7 @@ class ReservationServiceImplTest {
         assertFalse(reservationResponse.activate());
 
     }
+
     @Test
     void shouldDefineActiveFalseWhenStatusFinished() {
         //cenario
@@ -469,30 +495,85 @@ class ReservationServiceImplTest {
         assertFalse(reservationResponse.activate());
 
     }
+
     @Test
     void shouldSettingDateForTodayWhenDateisNull() {
-        //cenario
-        ArgumentCaptor<LocalDate> argumentCaptor = ArgumentCaptor.forClass(LocalDate.class);
-        UUID reservationUuid = UUID.fromString("088098f8-27e8-4d2c-a93c-b480c5d20790");
-        when(repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(any(), any())).thenReturn(List.of(reservation));
-        when(mapper.toReservationResponse(any())).thenCallRealMethod();
-        List<ReservationResponse> reservation1 = reservationService.getReservation(eq(null), eq("flink"), argumentCaptor.capture());
-        //verificação
-        verify(repository).findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(any(), argumentCaptor.capture());
-        assertEquals(LocalDate.now(), argumentCaptor.getValue());
+        // cenário
+        ArgumentCaptor<LocalDate> dateCaptor =
+                ArgumentCaptor.forClass(LocalDate.class);
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<Reservation> reservationPage =
+                new PageImpl<>(List.of(reservation), pageRequest, 1);
+
+        when(repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(
+                any(),
+                any(),
+                any()
+        )).thenReturn(reservationPage);
+
+        when(mapper.toReservationResponse(any()))
+                .thenCallRealMethod();
+
+        // ação
+        Page<ReservationResponse> result =
+                reservationService.getReservation(
+                        null,
+                        "flink",
+                        null,
+                        0,
+                        10
+                );
+
+        // verificação
+        verify(repository).findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(
+                any(),
+                dateCaptor.capture(),
+                any()
+        );
+
+        assertEquals(LocalDate.now(), dateCaptor.getValue());
     }
+
     @Test
     void shouldMantainDateForTodayWhenDateisNotNull() {
-        //cenario
-        ArgumentCaptor<LocalDate> argumentCaptor = ArgumentCaptor.forClass(LocalDate.class);
-        when(repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(any(), any())).thenReturn(List.of(reservation));
-        when(mapper.toReservationResponse(any())).thenCallRealMethod();
-        //ação
-        List<ReservationResponse> reservation1 = reservationService.getReservation(null, "flink", LocalDate.parse("2026-08-20"));
-        //verificação
-        verify(repository, atLeastOnce()).findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(any(), any());
+        // cenário
+        LocalDate expectedDate = LocalDate.parse("2026-08-20");
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<Reservation> reservationPage =
+                new PageImpl<>(List.of(reservation), pageRequest, 1);
+
+        when(repository.findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(
+                any(),
+                any(),
+                any()
+        )).thenReturn(reservationPage);
+
+        when(mapper.toReservationResponse(any()))
+                .thenCallRealMethod();
+
+        // ação
+        Page<ReservationResponse> result =
+                reservationService.getReservation(
+                        null,
+                        "flink",
+                        expectedDate,
+                        0,
+                        10
+                );
+
+        // verificação
+        verify(repository).findByEmployee_EmployeeNameAndReservationPeriod_ReservationDay(
+                any(),
+                eq(expectedDate),
+                any()
+        );
 
     }
+
     @Test
     void shouldThrowsExceptionWhenReservationNotFoundWhenTryDelete() {
         //cenario
@@ -505,6 +586,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Reservation not found", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldDeleteReservationWhenReservationExists() {
         //cenario
@@ -516,112 +598,194 @@ class ReservationServiceImplTest {
         verify(repository, atLeastOnce()).deleteById(reservationUuid);
 
     }
+
     @Test
     void shouldReturnListWith2ItensWhenDateIsNotNull() {
+        // cenário
         UUID seatUuid = UUID.randomUUID();
         var tomorrow = LocalDate.now().plusDays(1L);
+
         var reservationsWithIdAndPeriodDay = List.of(
 
-                Reservation.builder().id(UUID.randomUUID())
-                        .reservationPeriod(ReservationPeriod.builder()
-                                .reservationDay(LocalDate.now().plusDays(1L))
-                                .startTimeLocation(LocalTime.parse("08:00"))
-                                .endTimeLocation(LocalTime.parse("18:00"))
-                                .build())
-                        .active(true)
-                        .seat(Seat.builder()
-                                .id(seatUuid)
-                                .build())
-                        .employees(employee)
-                        .build(),
                 Reservation.builder()
                         .id(UUID.randomUUID())
-                        .employees(Employee.builder()
-                                .id(2L)
-                                .employeeName("Jonson")
-                                .business(Business.builder().build()).build())
-                        .seat(Seat.builder()
-                                .id(seatUuid)
-                                .build())
+                        .reservationPeriod(
+                                ReservationPeriod.builder()
+                                        .reservationDay(tomorrow)
+                                        .startTimeLocation(LocalTime.parse("08:00"))
+                                        .endTimeLocation(LocalTime.parse("18:00"))
+                                        .build()
+                        )
                         .active(true)
-                        .reservationPeriod(ReservationPeriod.builder()
-                                .reservationDay(LocalDate.now().plusDays(1L))
-                                .startTimeLocation(LocalTime.parse("08:00"))
-                                .endTimeLocation(LocalTime.parse("18:00"))
-                                .build())
-                        .build());
+                        .seat(
+                                Seat.builder()
+                                        .id(seatUuid)
+                                        .build()
+                        )
+                        .employees(employee)
+                        .build(),
 
-        when(repository.findBySeat_IdAndReservationPeriod_reservationDay(any(), any())).thenReturn(reservationsWithIdAndPeriodDay);
-        when(mapper.toReservationResponse(any())).thenCallRealMethod();
-        //ação
-        List<ReservationResponse> bySeatAndData = reservationService.getBySeatAndData(seatUuid, tomorrow);
+                Reservation.builder()
+                        .id(UUID.randomUUID())
+                        .employees(
+                                Employee.builder()
+                                        .id(2L)
+                                        .employeeName("Jonson")
+                                        .business(Business.builder().build())
+                                        .build()
+                        )
+                        .seat(
+                                Seat.builder()
+                                        .id(seatUuid)
+                                        .build()
+                        )
+                        .active(true)
+                        .reservationPeriod(
+                                ReservationPeriod.builder()
+                                        .reservationDay(tomorrow)
+                                        .startTimeLocation(LocalTime.parse("08:00"))
+                                        .endTimeLocation(LocalTime.parse("18:00"))
+                                        .build()
+                        )
+                        .build()
+        );
 
-        assertEquals(2, bySeatAndData.size());
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<Reservation> reservationPage =
+                new PageImpl<>(
+                        reservationsWithIdAndPeriodDay,
+                        pageRequest,
+                        reservationsWithIdAndPeriodDay.size()
+                );
+
+        when(repository.findBySeat_IdAndReservationPeriod_reservationDay(
+                any(),
+                any(),
+                any(Pageable.class)
+        )).thenReturn(reservationPage);
+
+        when(mapper.toReservationResponse(any()))
+                .thenCallRealMethod();
+
+        // ação
+        Page<ReservationResponse> bySeatAndData =
+                reservationService.getBySeatAndData(
+                        seatUuid,
+                        tomorrow,
+                        0, 10
+                );
+
+        // verificação
+        assertEquals(2, bySeatAndData.getContent().size());
     }
+
     @Test
     void shouldReturnListWith3ItensWhenDateIsNotNull() {
         UUID seatUuid = UUID.randomUUID();
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
         var reservationsWithId = List.of(
-
-                Reservation.builder().id(UUID.randomUUID())
-                        .reservationPeriod(ReservationPeriod.builder()
-                                .reservationDay(LocalDate.now())
-                                .startTimeLocation(LocalTime.parse("08:00"))
-                                .endTimeLocation(LocalTime.parse("18:00"))
-                                .build())
+                Reservation.builder()
+                        .id(UUID.randomUUID())
+                        .reservationPeriod(
+                                ReservationPeriod.builder()
+                                        .reservationDay(LocalDate.now())
+                                        .startTimeLocation(LocalTime.parse("08:00"))
+                                        .endTimeLocation(LocalTime.parse("18:00"))
+                                        .build()
+                        )
                         .active(true)
-                        .seat(Seat.builder()
-                                .id(seatUuid)
-                                .build())
+                        .seat(
+                                Seat.builder()
+                                        .id(seatUuid)
+                                        .build()
+                        )
                         .employees(employee)
                         .build(),
-                Reservation.builder()
-                        .id(UUID.randomUUID())
-                        .employees(Employee.builder()
-                                .id(2L)
-                                .employeeName("Jonson")
-                                .business(Business.builder().build()).build())
-                        .seat(Seat.builder()
-                                .id(seatUuid)
-                                .build())
-                        .active(true)
-                        .reservationPeriod(ReservationPeriod.builder()
-                                .reservationDay(LocalDate.now())
-                                .startTimeLocation(LocalTime.parse("08:00"))
-                                .endTimeLocation(LocalTime.parse("18:00"))
-                                .build())
-                        .build(),
-                Reservation.builder()
-                        .id(UUID.randomUUID())
-                        .employees(Employee.builder()
-                                .id(2L)
-                                .employeeName("Arnaldo")
-                                .business(Business.builder().build()).build())
-                        .seat(Seat.builder()
-                                .id(seatUuid)
-                                .build())
-                        .active(true)
-                        .reservationPeriod(ReservationPeriod.builder()
-                                .reservationDay(LocalDate.now())
-                                .startTimeLocation(LocalTime.parse("08:00"))
-                                .endTimeLocation(LocalTime.parse("18:00"))
-                                .build())
-                        .build()
 
+                Reservation.builder()
+                        .id(UUID.randomUUID())
+                        .employees(
+                                Employee.builder()
+                                        .id(2L)
+                                        .employeeName("Jonson")
+                                        .business(Business.builder().build())
+                                        .build()
+                        )
+                        .seat(
+                                Seat.builder()
+                                        .id(seatUuid)
+                                        .build()
+                        )
+                        .active(true)
+                        .reservationPeriod(
+                                ReservationPeriod.builder()
+                                        .reservationDay(LocalDate.now())
+                                        .startTimeLocation(LocalTime.parse("08:00"))
+                                        .endTimeLocation(LocalTime.parse("18:00"))
+                                        .build()
+                        )
+                        .build(),
+
+                Reservation.builder()
+                        .id(UUID.randomUUID())
+                        .employees(
+                                Employee.builder()
+                                        .id(2L)
+                                        .employeeName("Arnaldo")
+                                        .business(Business.builder().build())
+                                        .build()
+                        )
+                        .seat(
+                                Seat.builder()
+                                        .id(seatUuid)
+                                        .build()
+                        )
+                        .active(true)
+                        .reservationPeriod(
+                                ReservationPeriod.builder()
+                                        .reservationDay(LocalDate.now())
+                                        .startTimeLocation(LocalTime.parse("08:00"))
+                                        .endTimeLocation(LocalTime.parse("18:00"))
+                                        .build()
+                        )
+                        .build()
         );
 
-        when(repository.findBySeat_Id(any())).thenReturn(reservationsWithId);
-        when(mapper.toReservationResponse(any())).thenCallRealMethod();
-        //ação
-        List<ReservationResponse> bySeatAndData = reservationService.getBySeatAndData(seatUuid, null);
+        PageRequest pageRequest = PageRequest.of(0, 10, sort);
 
-        //verificação
-        assertEquals(3, bySeatAndData.size());
+        Page<Reservation> reservationPage =
+                new PageImpl<>(
+                        reservationsWithId,
+                        pageRequest,
+                        reservationsWithId.size()
+                );
+
+        when(repository.findBySeat_Id(any(),eq(pageRequest)))
+                .thenReturn(reservationPage);
+
+        when(mapper.toReservationResponse(any()))
+                .thenCallRealMethod();
+
+        // ação
+        Page<ReservationResponse> bySeatAndData =
+                reservationService.getBySeatAndData(
+                        seatUuid,
+                        null,
+                        0,
+                        10
+                );
+
+        // verificação
+        assertEquals(3, bySeatAndData.getContent().size());
     }
+
     @Test
     void shouldDefineDateForTodayIfIsNull() {
         //cenario
         UUID seatUuid = UUID.randomUUID();
+        Sort sort = Sort.by(Sort.Direction.ASC, "reservationPeriod");
+        PageRequest pageRequest = PageRequest.of(0,10, sort);
         ArgumentCaptor<LocalDate> argumentCaptor = ArgumentCaptor.forClass(LocalDate.class);
         var reservationsWithId = List.of(
 
@@ -671,21 +835,29 @@ class ReservationServiceImplTest {
                         .build()
 
         );
-        when(repository.findByReservationPeriod_reservationDay(any())).thenReturn(reservationsWithId);
+        Page<Reservation> reservationPage =
+                new PageImpl<>(
+                        reservationsWithId,
+                        pageRequest,
+                        reservationsWithId.size()
+                );
+        when(repository.findByReservationPeriod_reservationDay(any(), any())).thenReturn(reservationPage);
         when(mapper.toReservationResponse(any())).thenCallRealMethod();
 
 
         //ação
-        List<ReservationResponse> byDay = reservationService.getByDay(argumentCaptor.capture());
+        Page<ReservationResponse> byDay = reservationService.getByDay(null, 0, 10);
         //verificação
-        verify(repository).findByReservationPeriod_reservationDay(argumentCaptor.capture());
+        verify(repository).findByReservationPeriod_reservationDay(argumentCaptor.capture(), eq(pageRequest));
         assertEquals(LocalDate.now(), argumentCaptor.getValue());
     }
+
     @Test
     void shouldIgnoreIfDate() {
         //cenario
         var tomorrow = LocalDate.now().plusDays(1L);
         UUID seatUuid = UUID.randomUUID();
+       PageRequest pageRequest = PageRequest.of(0, 10);
         var reservationsWithId = List.of(
 
                 Reservation.builder().id(UUID.randomUUID())
@@ -734,13 +906,20 @@ class ReservationServiceImplTest {
                         .build()
 
         );
-        when(repository.findByReservationPeriod_reservationDay(any())).thenReturn(reservationsWithId);
+        Page<Reservation> reservationPage =
+                new PageImpl<>(
+                        reservationsWithId,
+                        pageRequest,
+                        reservationsWithId.size()
+                );
+        when(repository.findByReservationPeriod_reservationDay(any(), any())).thenReturn(reservationPage);
         when(mapper.toReservationResponse(any())).thenCallRealMethod();
         //ação
-        List<ReservationResponse> byDay = reservationService.getByDay(tomorrow);
+        Page<ReservationResponse> byDay = reservationService.getByDay(tomorrow, 0, 10);
         //verificação
-        assertEquals(tomorrow, byDay.getFirst().reservationPeriod().getReservationDay());
+        assertEquals(tomorrow, byDay.stream().findFirst().get().reservationPeriod().getReservationDay());
     }
+
     @Test
     void shouldThrowsExceptionWhenReservationIdNotFound() {
         when(repository.findById(any())).thenThrow(new ReservationNotFoundException("Reservation Not Found"));
@@ -751,6 +930,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Reservation Not Found", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldThrowsExceptionWHenReservationStatusIsNotConfimed() {
         //cenario
@@ -778,6 +958,7 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Não é possivel fechar reserverva para status PENDING", exception.toProblemDetail().getDetail());
     }
+
     @Test
     void shouldSetAttributesForReservation() {
         //cenario
@@ -811,6 +992,7 @@ class ReservationServiceImplTest {
 
 
     }
+
     @Test
     void shouldReturnListWith1ItemWhenGetByStatus() {
         //cenario
@@ -820,6 +1002,7 @@ class ReservationServiceImplTest {
         //verificação
         verify(repository, times(1)).findByActiveTrueAndReservationStatus(any());
     }
+
     @Test
     void shouldSendNotificationForCancellReservations() {
         //cenario
@@ -845,6 +1028,7 @@ class ReservationServiceImplTest {
         //verificação
         verify(reservationService, atLeastOnce()).sendCancellEmail(any(), any(), any(), any());
     }
+
     @Test
     void shouldSendNotificationForConfirmReservations() {
         //cenario
@@ -870,8 +1054,9 @@ class ReservationServiceImplTest {
         //verificação
         verify(reservationService, atLeastOnce()).sendEmailToConfirm(any(), any(), any(), any());
     }
+
     @Test
-    void shouldSkipSettingActivefalseWhenAllReservationStillValid(){
+    void shouldSkipSettingActivefalseWhenAllReservationStillValid() {
         //cenario
         when(repository.findByActiveTrueAndReservationStatus(ReservationStatus.PENDING)).thenReturn(reservationList);
         //ação
@@ -879,8 +1064,9 @@ class ReservationServiceImplTest {
         //verificação
         verify(repository, never()).save(any());
     }
+
     @Test
-    void shouldSettingActivefalseWhenAllReservationStillValid(){
+    void shouldSettingActivefalseWhenAllReservationStillValid() {
         //cenario
         var reservations = List.of(new Reservation(
                         UUID.randomUUID(),
@@ -915,7 +1101,7 @@ class ReservationServiceImplTest {
     }
 
     @Test
-    void shouldthrowsExceptioinWhenreservationNotFoun(){
+    void shouldthrowsExceptioinWhenreservationNotFoun() {
         //cenario
 
         UUID uuid = UUID.randomUUID();
@@ -925,8 +1111,9 @@ class ReservationServiceImplTest {
         //verificação
         assertEquals("Reservation Not Found", exception.toProblemDetail().getDetail());
     }
+
     @Test
-    void shouldThrowsExceptionWhenReservationCanNotConfirmed(){
+    void shouldThrowsExceptionWhenReservationCanNotConfirmed() {
         UUID uuid = UUID.randomUUID();
         Reservation reservation1 = Reservation.builder()
                 .id(uuid)
@@ -944,13 +1131,14 @@ class ReservationServiceImplTest {
 
         //ação
         FindASetException exception = assertThrows(ReservationDesativatedException.class,
-                ()-> reservationService.confirmReservation(uuid));
+                () -> reservationService.confirmReservation(uuid));
         //verificação
         assertEquals("Reserva não pode ser confirmada pois passou do prazo para confirmação", exception.toProblemDetail().getDetail());
 
     }
+
     @Test
-    void shouldConfirmReservation(){
+    void shouldConfirmReservation() {
         //cenario
         UUID uuid = UUID.randomUUID();
         Reservation reservation1 = Reservation.builder()
@@ -972,6 +1160,6 @@ class ReservationServiceImplTest {
         ReservationResponse reservationResponse = reservationService.confirmReservation(uuid);
 
         //verificação
-        assertEquals(ReservationStatus.CONFIRMED,reservationResponse.reservationStatus());
+        assertEquals(ReservationStatus.CONFIRMED, reservationResponse.reservationStatus());
     }
 }
